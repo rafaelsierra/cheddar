@@ -1,3 +1,14 @@
+NOTE:
+=====
+
+This project is no near of working, we just started to coding it, there is no
+branches, nearly no tests or whatsoever, yet, you are free to join us :)
+
+And please, help us to keep all the code and commits single-languaged, yet the
+main commiters are Brazilian, we ask you to code in english only (except for the
+translation files, of course). 
+
+
 cheddar
 =======
 
