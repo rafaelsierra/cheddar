@@ -1,0 +1,10 @@
+Django>=1.5
+django-celery>=3.0.11
+
+django-extensions
+South
+django-nose
+ipdb
+ipython
+
+git+https://github.com/rafaelsdm/django-metadata.git
