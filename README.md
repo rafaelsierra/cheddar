@@ -66,3 +66,16 @@ locally with guest access enabled, database based caching and static/media root
 poiting to PROJECT_ROOT (which is poiting to one dir up of src).
 
 Now you are ready to go.
+
+
+Using Python Shell
+==================
+
+If you ever want to run `python manage.py shell` or any other django command, 
+just run before `source envs.py`, like this:
+
+    $ source envs.py
+    $ cd src
+    $ python manage.py shell
+    $ python manage.py celery worker -l ERROR
+     
