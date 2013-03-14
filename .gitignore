@@ -1,4 +1,7 @@
 *.log
 *.pot
 *.pyc
+.project
 local_settings.py
+localenv.sh
+src/cheddar/settings/sdm.py
