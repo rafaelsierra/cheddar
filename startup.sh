@@ -1,7 +1,6 @@
 #!/bin/bash
 
 source $(dirname $0)/envs.sh
-echo $PYTHONPATH
 if [ -z PROJECT ]; then
     echo "Variavel PROJECT nao configurada"
     exit 1;
