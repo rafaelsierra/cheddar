@@ -3,6 +3,8 @@
 import os
 PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
 
+CRAWLER_USER_AGENT = 'Cheddar Reader Crawler/1.0'
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -20,6 +22,8 @@ DATABASES = {
         'PORT': '',
     }
 }
+
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 
 ALLOWED_HOSTS = ['localhost']
 
@@ -71,6 +75,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'south',
+    'djcelery',
     'feeds',
 )
 
@@ -97,3 +102,12 @@ LOGGING = {
         },
     }
 }
+
+#
+# Celery
+#
+CELERY_IMPORTS = (
+    'feeds.tasks',
+)
+import djcelery
+djcelery.setup_loader()

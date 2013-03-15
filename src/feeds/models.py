@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 from django.db import models
 from base.models import BaseModel
+from celery import task
+
+from django.db.models.signals import post_save
+from feeds.signals import update_site_data
+from feeds.utils import urlopen
 
 class Site(BaseModel):
     '''
@@ -17,6 +22,12 @@ class Site(BaseModel):
         # TODO: check if feed_url is a valid feed
         pass
     
+    # I don't think update() would be a good name here
+    def update_data(self):
+        # TODO: Finish this
+        urlopen(self.feed_url)
+        
+    
     def save(self, *args, **kwargs):
         self.full_clean()
         super(Site, self).save(*args, **kwargs)
@@ -27,9 +38,17 @@ class Post(BaseModel):
     title = models.CharField(max_length=1024)
     content = models.TextField()
     author = models.CharField(max_length=64)
+    
     # Unfortunally not all feeds provide unique urls for each post, so we cannot
     # have a unique=True on this field
     url = models.URLField(max_length=256)
     
+    # This field is used in forecasting next crawler date
+    captured_at = models.DateTimeField(auto_now_add=True)
+    
     class Meta:
         ordering = ('-created_at',)
+
+
+# Signals
+post_save.connect(update_site_data, sender=Site, dispatch_uid='feeds.Site.update_site_data')
