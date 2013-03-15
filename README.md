@@ -8,6 +8,8 @@ And please, help us to keep all the code and commits single-languaged, yet the
 main commiters are Brazilian, we ask you to code in english only (except for the
 translation files, of course). 
 
+If you are good at writing tests, you are more than welcome to help us!
+
 
 cheddar
 =======
