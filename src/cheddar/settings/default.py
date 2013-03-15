@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Django settings for cheddar project.
 import os
-PROJECT_ROOT = os.path.dirname(os.path.join(os.path.abspath(__file__), '..', '..', '..'))
+PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -71,7 +71,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'south',
-    
+    'feeds',
 )
 
 LOGGING = {
