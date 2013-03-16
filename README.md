@@ -81,3 +81,15 @@ just run before `source envs.py`, like this:
     $ python manage.py shell
     $ python manage.py celery worker -l ERROR
      
+
+Note about SQLite
+=================
+
+Yet we avoid using database-specific features in the future we may need to use
+database views, stored procedure or others, SQLite is a single-writer database
+which, under Cheddar conditions, becomes a problem since we heavily 
+multiprocessing with Celery, so you will experiment lots of "database is locked"
+errors.
+
+If you don't want to mess your desktop with databases running, start an instance
+of a Linux running PostgreSQL and use it, or MySQL.
