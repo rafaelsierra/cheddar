@@ -6,9 +6,16 @@ from datetime import timedelta
 PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
 
 CRAWLER_USER_AGENT = 'Cheddar Reader Crawler/1.0'
-MIN_UPDATE_INTERVAL = timedelta(minutes=10) # Updates at max 6 times per hour
-MAX_UPDATE_INTERVAL = timedelta(hours=12) # Updates at last 2 times per day
+
+MIN_UPDATE_INTERVAL_SECONDS = 600 # Updates at max 6 times per hour
+MIN_UPDATE_INTERVAL = timedelta(seconds=MIN_UPDATE_INTERVAL_SECONDS) 
+
+MAX_UPDATE_INTERVAL_SECONDS = 12*3600 # Updates at last 2 times per day
+MAX_UPDATE_INTERVAL = timedelta(MAX_UPDATE_INTERVAL_SECONDS)
+
 MAX_UPDATE_WAIT = timedelta(hours=48) # After 2 days without updates, force another one
+CHEDDAR_HISTORY_SIZE = 20 # How much posts should be considered to calculate next update
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -38,7 +45,7 @@ LANGUAGE_CODE = 'en-us'
 SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True
+USE_TZ = False
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
