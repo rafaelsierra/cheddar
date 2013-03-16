@@ -3,9 +3,10 @@ from django.contrib import admin
 from feeds.models import Site, Post
 
 class SiteAdmin(admin.ModelAdmin):
-    list_display = ('url', 'title', 'created_at')
+    list_display = ('url', 'title', 'updated_at')
     list_filter = ('is_active',)
     search_fields = ('title', 'url')
+    readonly_fields = ('title', 'url')
     
 
 class PostAdmin(admin.ModelAdmin):

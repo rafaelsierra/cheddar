@@ -4,8 +4,9 @@ from base.models import BaseModel
 from celery import task
 
 from django.db.models.signals import post_save
-from feeds.signals import update_site_data
-from feeds.utils import urlopen
+from feeds.utils import feedopen
+from feeds.tasks import update_site_feed, make_request
+from feeds.signals import start_feed_update
 
 class Site(BaseModel):
     '''
@@ -22,15 +23,23 @@ class Site(BaseModel):
         # TODO: check if feed_url is a valid feed
         pass
     
+    
     # I don't think update() would be a good name here
-    def update_data(self):
-        # TODO: Finish this
-        urlopen(self.feed_url)
+    def update_feed(self):
+        # Celery has an contrib module to handle instance methods, but I've
+        # never used it, so I don't know if we should trust if 
+        update_site_feed.delay(self)
         
     
     def save(self, *args, **kwargs):
+        '''Force model validation'''
         self.full_clean()
         super(Site, self).save(*args, **kwargs)
+        
+    
+    def getfeed(self):
+        '''Opens self.feed_url and parses it'''
+        return feedopen(self.feed_url)
 
 
 class Post(BaseModel):
@@ -50,5 +59,7 @@ class Post(BaseModel):
         ordering = ('-created_at',)
 
 
-# Signals
-post_save.connect(update_site_data, sender=Site, dispatch_uid='feeds.Site.update_site_data')
+# 
+# Connecting signals
+#
+post_save.connect(start_feed_update, sender=Site, dispatch_uid='feeds.tasks.start_feed_update')
