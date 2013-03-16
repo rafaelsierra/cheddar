@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 # Django settings for cheddar project.
 import os
+from datetime import timedelta
+
 PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
 
 CRAWLER_USER_AGENT = 'Cheddar Reader Crawler/1.0'
+MIN_UPDATE_INTERVAL = timedelta(minutes=10) # Updates at max 6 times per hour
+MAX_UPDATE_INTERVAL = timedelta(hours=12) # Updates at last 2 times per day
+MAX_UPDATE_WAIT = timedelta(hours=48) # After 2 days without updates, force another one
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
