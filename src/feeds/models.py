@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.conf import settings
 from base.models import BaseModel
 from celery import task
 
@@ -8,6 +9,7 @@ from feeds.utils import feedopen
 from feeds.tasks import update_site_feed, make_request
 from feeds.signals import start_feed_update
 import hashlib
+from django.utils import timezone
 
 class Site(BaseModel):
     '''
@@ -19,6 +21,12 @@ class Site(BaseModel):
     url = models.URLField(null=True, blank=True)
     feed_url = models.URLField(unique=True) # No duplicated feed urls
     title = models.CharField(max_length=256, null=True, blank=True)
+    
+    def __unicode__(self):
+        if self.title:
+            return self.title
+        else:
+            return unicode(self.id)
     
     
     def clean(self):
@@ -42,6 +50,42 @@ class Site(BaseModel):
     def getfeed(self):
         '''Opens self.feed_url and parses it'''
         return feedopen(self.feed_url)
+
+    
+    def next_update_eta(self):
+        '''Returns when this site should update again in seconds
+        This is a pretty simple function to calculate the average time between
+        posts.
+        '''
+        intervals = []
+        for post in self.posts.all():
+            # Checks if already have the desired intervals
+            if len(intervals) >= settings.CHEDDAR_HISTORY_SIZE:
+                break
+            
+            if not intervals:
+                interval = timezone.now() - post.captured_at
+                intervals.append(interval.days*3600 + interval.seconds)
+                
+            try:
+                previous = post.get_previous_by_captured_at()
+            except Post.DoesNotExist:
+                # End of Posts
+                break
+            
+            interval = post.captured_at - previous.captured_at
+            intervals.append(interval.days*3600 + interval.seconds)
+            
+        # Put eta somewhere between min and max time
+        if not intervals:
+            return settings.MIN_UPDATE_INTERVAL_SECONDS
+        
+        eta = sum(intervals)/len(intervals)
+        if eta < settings.MIN_UPDATE_INTERVAL_SECONDS:
+            eta = settings.MIN_UPDATE_INTERVAL_SECONDS
+        elif eta > settings.MAX_UPDATE_INTERVAL_SECONDS:
+            eta = settings.MAX_UPDATE_INTERVAL_SECONDS
+        return eta
 
 
 class Post(BaseModel):

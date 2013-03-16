@@ -80,3 +80,6 @@ def update_site_feed(site):
             )
             post.created_at = created_at
             post.save()
+            
+    # Schedule the next update
+    update_site_feed.apply_async(args=(site,), countdown=site.next_update_eta())
