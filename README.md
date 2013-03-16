@@ -21,7 +21,7 @@ Requirements
 ============
 
  * RabbitMQ Server (or any other Celery [supported broker](http://docs.celeryproject.org/en/latest/getting-started/brokers/index.html))
- * PostgreSQL (or MariaDB/MySQL, I suggest PostgreSQL)
+ * PostgreSQL (or MariaDB/MySQL, I suggest PostgreSQL) with UTF-8 encoding
  * virtualenv and pip
  * Shell knowledge
  
