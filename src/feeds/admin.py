@@ -11,8 +11,11 @@ class SiteAdmin(admin.ModelAdmin):
 
 class PostAdmin(admin.ModelAdmin):
     raw_id_fields = ('site',)
-    list_display = ('small_title','author', 'site')
+    list_display = ('small_title','author', 'site_name', 'created_at', 'captured_at')
     search_fields = ('title', 'text', 'site__title')
+    
+    def site_name(self, instance):
+        return instance.site.title if instance.site.title else unicode(instance.site.id)
     
     def small_title(self, instance):
         'Returns a small instance to display on admin'
