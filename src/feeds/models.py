@@ -63,9 +63,10 @@ class Site(BaseModel):
             if len(intervals) >= settings.CHEDDAR_HISTORY_SIZE:
                 break
             
-            if not intervals:
-                interval = timezone.now() - post.captured_at
-                intervals.append(interval.days*3600 + interval.seconds)
+            # I don't know if this is a good thing
+            #if not intervals:
+            #    interval = timezone.now() - post.captured_at
+            #    intervals.append(interval.days*3600 + interval.seconds)
                 
             try:
                 previous = post.get_previous_by_captured_at()

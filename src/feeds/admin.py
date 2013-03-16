@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 from feeds.models import Site, Post
+import datetime
 
 class SiteAdmin(admin.ModelAdmin):
-    list_display = ('url', 'title', 'updated_at')
+    list_display = ('url', 'title', 'updated_at', 'next_update')
     list_filter = ('is_active',)
     search_fields = ('title', 'url')
     readonly_fields = ('title', 'url')
+    
+    def next_update(self, instance):
+        return instance.updated_at + datetime.timedelta(seconds=instance.next_update_eta())
     
 
 class PostAdmin(admin.ModelAdmin):
