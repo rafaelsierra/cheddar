@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load i18n%}
+{% block container %}
+    <div class="span12">
+        <h1>{% trans "Login" %}</h1>
+        <form action="{% url "accounts:login" %}" class="form-horizontal" method="post">
+            {% csrf_token %}
+            {% include "forms/horizontal.html" with form=form %}
+            <button class="btn btn-primary offset2">{% trans "Register" %}</button>
+        </form>
+    </div>
+{% endblock %}

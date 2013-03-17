@@ -9,12 +9,14 @@ CRAWLER_USER_AGENT = 'Cheddar Reader Crawler/1.0'
 
 MIN_UPDATE_INTERVAL_SECONDS = 600 # Updates at max 6 times per hour
 MIN_UPDATE_INTERVAL = timedelta(seconds=MIN_UPDATE_INTERVAL_SECONDS) 
-
 MAX_UPDATE_INTERVAL_SECONDS = 12*3600 # Updates at last 2 times per day
 MAX_UPDATE_INTERVAL = timedelta(MAX_UPDATE_INTERVAL_SECONDS)
-
 MAX_UPDATE_WAIT = timedelta(hours=48) # After 2 days without updates, force another one
 CHEDDAR_HISTORY_SIZE = 20 # How much posts should be considered to calculate next update
+
+# Change this if you want bring caos into your instance
+CHEDDAR_DEFAULT_USER_ACTIVE_STATUS = False
+LOGIN_REDIRECT_URL = '/' 
 
 
 DEBUG = True
@@ -89,6 +91,7 @@ INSTALLED_APPS = (
     'south',
     'djcelery',
     'feeds',
+    'accounts',
 )
 
 LOGGING = {
