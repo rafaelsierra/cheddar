@@ -4,7 +4,7 @@ from feeds.models import Site, Post
 import datetime
 
 class SiteAdmin(admin.ModelAdmin):
-    list_display = ('url', 'title', 'updated_at', 'next_update')
+    list_display = ('url', 'title', 'updated_at', 'next_update', 'next_update_eta')
     list_filter = ('is_active',)
     search_fields = ('title', 'url')
     readonly_fields = ('title', 'url')

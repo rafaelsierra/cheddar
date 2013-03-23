@@ -11,6 +11,7 @@ from feeds.signals import start_feed_update
 import hashlib
 from django.utils import timezone
 
+
 class Site(BaseModel):
     '''
         Every site added by users goes here, 
@@ -109,6 +110,31 @@ class Post(BaseModel):
         if not self.url_hash:
             self.url_hash = Post.hashurl(self.url)
         return super(Post, self).save(*args, **kwargs)
+    
+    def _get_userpost(self, user):
+        # Cyclic import
+        from accounts.models import UserPost
+        return UserPost.objects.get_or_create(user=user, post=self)[0]
+    
+    def mark_field(self, user, field, value):
+        '''Mark this post's field as `value`'''
+        userpost = self._get_userpost(user)
+        setattr(userpost, field, value)
+        userpost.save()
+        
+    def mark_as_read(self, user):
+        self.mark_field(user, 'is_read', True)
+    
+    def mark_as_unread(self, user):
+        self.mark_field(user, 'is_read', False)
+    
+    def mark_as_starred(self, user):
+        self.mark_field(user, 'is_starred', True)
+    
+    def mark_as_unstarred(self, user):
+        '''Does "unstarred" even exists as word?'''
+        self.mark_field(user, 'is_starred', False)
+
     
     class Meta:
         ordering = ('-created_at',)
