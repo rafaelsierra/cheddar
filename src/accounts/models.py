@@ -9,6 +9,7 @@ from django.db.models import Q
 
 class UserSitePostsManager(BaseModelManager):
     def user_posts(self, user, is_read):
+        '''Avoid using user_posts directly, use unread or read instead'''
         return Post.objects.filter(
             Q(userpost__user=user, userpost__is_read=is_read)|Q(userpost__user__isnull=True),
             site__usersite__user=user,

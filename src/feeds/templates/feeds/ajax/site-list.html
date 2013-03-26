@@ -1,0 +1,6 @@
+{% load accountstags %}
+{% for site in object_list %}
+<li id="site-{{site.id}}">
+    <a href="#TODO">{{site.title}} <span class="badge badge-success unread-counter">{% show_unread_count_for_site %}</span></a>
+</li>
+{% endfor %}

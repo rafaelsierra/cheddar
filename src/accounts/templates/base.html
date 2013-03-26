@@ -6,32 +6,35 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!-- Bootstrap -->
         <link href="{{STATIC_URL}}css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="{{STATIC_URL}}css/bootstrap-responsive.min.css" rel="stylesheet">
     </head>
     <body>
-        <div class="container-fluid">
-            {% block navbar %}
-                <div class="navbar">
-                    <nav role="navigation" class="navbar-inner">
-                        <div class="container-fluid">
-                            <a href="#" class="brand">Cheddar</a>
-                            <ul class="nav">
-                                {% block navbar-items %}{% endblock %}
-                            </ul>
-                            <ul class="nav pull-right">
+        {% block navbar %}
+            <div class="navbar navbar-static-top">
+                <nav role="navigation" class="navbar-inner ">
+                    <div class="container-fluid">
+                        <a href="#" class="brand">Cheddar</a>
+                        <ul class="nav">
+                            {% block navbar-items %}{% endblock %}
+                        </ul>
+                        <ul class="nav pull-right">
+                            {% if user.is_anonymous %}
                                 <li><a href="{% url "accounts:register"%}">{% trans "Signup" %}</a></li>
-                                <li class="divider-vertical"></li>
-                                <li class="dropdown">
-                                    {% if user.is_authenticated %}
-                                        <a>{% trans "Welcome" %}, {{user.username}}</a>
-                                    {% else %}
-                                        <a href="{% url "accounts:login" %}">{% trans "Login" %}</a>
-                                    {% endif %}
-                                </li>
-                            </ul>
-                        </div>
-                    </nav>
-                </div>
-            {% endblock %}
+                            {% endif %}
+                            <li class="divider-vertical"></li>
+                            <li class="dropdown">
+                                {% if user.is_authenticated %}
+                                    <a>{% trans "Welcome" %}, {{user.username}}</a>
+                                {% else %}
+                                    <a href="{% url "accounts:login" %}">{% trans "Login" %}</a>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        {% endblock %}        
+        <div class="container-fluid">
             {% block container %}{% endblock %}
         </div>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>

@@ -28,7 +28,7 @@ class Site(BaseModel):
             return self.title
         else:
             return unicode(self.id)
-    
+
     
     def clean(self):
         # TODO: check if feed_url is a valid feed
@@ -88,6 +88,15 @@ class Site(BaseModel):
         elif eta > settings.MAX_UPDATE_INTERVAL_SECONDS:
             eta = settings.MAX_UPDATE_INTERVAL_SECONDS
         return eta
+
+
+    def favicon(self):
+        'TODO: This'
+
+
+    class Meta:
+        ordering = ('title',)
+
 
 
 class Post(BaseModel):

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block container %}
+    <div class="row-fluid">
+        <!-- Feeds menu -->
+        <div class="span2 hidden-phone">
+            <ul class="nav nav-list">
+                <li class="nav-header" id="feed-list">{% trans "Feeds" %}</li>
+            </ul>
+        </div>
+        <!-- Feed content -->
+        <div class="span10"></div>
+    </div>
+{% endblock %}
+{% block extrascript %}
+    <script src="{% url 'feeds:cheddarjs' %}"></script>
+    <script src="{{STATIC_URL}}feeds/js/everything.js"></script>
+{% endblock %}    

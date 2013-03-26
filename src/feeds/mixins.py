@@ -5,7 +5,7 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from accounts.models import UserSite
-import ipdb
+
 
 class FeedListMixin(MultipleObjectMixin):
     u'''Exactly like MultipleObjectMixin but applies the rules for users and
@@ -29,6 +29,6 @@ class FeedListMixin(MultipleObjectMixin):
         else:
             posts= UserSite.posts.unread(self.request.user)
             
-        ipdb.set_trace()
+        return posts
         
         
