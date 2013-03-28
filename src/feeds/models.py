@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
-from django.db import models
-from django.conf import settings
 from base.models import BaseModel
 from celery import task
-
+from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import naturaltime
+from django.db import models
 from django.db.models.signals import post_save
-from feeds.utils import feedopen
-from feeds.tasks import update_site_feed, make_request
-from feeds.signals import start_feed_update
-import hashlib
 from django.utils import timezone
+from django.utils.timezone import is_aware, utc
+from feeds.signals import start_feed_update
+from feeds.tasks import update_site_feed, make_request
+from feeds.utils import feedopen
+import datetime
+import hashlib
+from django.template.defaultfilters import time as timefilter, date as datefilter
+import base64
 
 
 class Site(BaseModel):
@@ -144,6 +148,23 @@ class Post(BaseModel):
         '''Does "unstarred" even exists as word?'''
         self.mark_field(user, 'is_starred', False)
 
+    def as_base64(self):
+        return u'data:text/html;base64,{}'.format(base64.encodestring(self.content.encode('utf-8')))
+
+    def captured_at_display(self):
+        u'''Returns a prettier date format'''
+
+        now = datetime.datetime.now(utc if is_aware(self.captured_at) else None)
+        if self.captured_at < now:
+            delta = now - self.captured_at
+        else:
+            delta = self.captured_at - now        
+        
+        if delta.days >= 1:
+            return datefilter(self.captured_at)
+        else:
+            return timefilter(self.captured_at)
+        
     
     class Meta:
         ordering = ('-created_at',)

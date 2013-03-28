@@ -1,3 +1,5 @@
+
+
 $(document).ready(function(){
-    $.cheddar('loadSites');
+    $.cheddar().cheddar('loadSites').cheddar('loadPosts');
 });

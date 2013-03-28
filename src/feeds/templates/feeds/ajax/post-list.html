@@ -1,0 +1,12 @@
+{% for post in posts %}
+<article class="post well" id="post-{{post.id}}" data-post_id="{{post.id}}" data-site_id="{{post.site.id}}">
+    <header>
+        <h1>
+            <span class="post-site span2">{{post.site.title}}</span>
+            <span class="span7">{{post.title|escape|safe}}</span>
+            <span class="post-date span1 pull-right">{{post.captured_at_display}}</span>
+        </h1>
+    </header>
+    <div class="post-content">{{post.content|escape|safe}}</div>
+</article>
+{% endfor %}
