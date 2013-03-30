@@ -67,6 +67,7 @@
     var methods = {
         init: function(options){
             $("#postlist").on('click', 'article.post header', function(){
+                console.log(this)
                 read_post($(this).parent());
             });
             
@@ -124,7 +125,7 @@
         refresh: function(){
             $("#feed-list").siblings().remove();
             $("#postlist").html('');
-            $.cheddar().cheddar('loadSites').cheddar('loadPosts');
+            $.cheddar('loadSites').cheddar('loadPosts');
             navigation_state.current_post = null;
         }
     };
