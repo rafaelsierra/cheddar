@@ -67,7 +67,6 @@
     var methods = {
         init: function(options){
             $("#postlist").on('click', 'article.post header', function(){
-                console.log(this)
                 read_post($(this).parent());
             });
             
