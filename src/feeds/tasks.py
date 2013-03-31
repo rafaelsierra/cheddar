@@ -9,6 +9,7 @@ import logging
 import socket
 import time
 import urllib2
+from django.utils import timezone
 
 logger = logging.getLogger('feeds.tasks')
 
@@ -38,7 +39,8 @@ def parse_feed(rawdata):
 def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
-    from feeds.models import Post 
+    from feeds.models import Post
+    
     feed = site.getfeed()
     # Update this site info
     if not 'feed' in feed:
@@ -109,4 +111,26 @@ def update_site_feed(site):
         logger.info('Site {site_id} got {new} new posts from {total} in feed'.format(site_id=site.id, new=new_posts_found, total=len(feed['entries'])))
         
     # Schedule the next update
-    update_site_feed.apply_async(args=(site,), countdown=site.next_update_eta())
+    result = update_site_feed.apply_async(args=(site,), countdown=site.next_update_eta())
+    
+    # Updates site task_id
+    site.task_id = result.id
+    site.last_update = timezone.now()
+    site.save()    
+    
+    
+@celery.task()
+def check_sites_running():
+    '''Check if site's crawler is still running'''
+    from feeds.models import Site
+    sites = Site.objects.need_checkup()
+        
+    logger.info(u"Checking {} sites which aren't running".format(sites.count()))
+    
+    for site in sites:
+        if not site.task or site.task.failed():
+            logger.warn('Starting task for site {}'.format(site.id))
+            site.update_feed()
+            
+    
+    

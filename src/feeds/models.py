@@ -1,20 +1,34 @@
 # -*- coding: utf-8 -*-
-from base.models import BaseModel
+from base.models import BaseModel, BaseModelManager
 from celery import task
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import naturaltime
 from django.db import models
 from django.db.models.signals import post_save
+from django.template.defaultfilters import time as timefilter, \
+    date as datefilter
 from django.utils import timezone
 from django.utils.timezone import is_aware, utc
 from feeds.signals import start_feed_update
 from feeds.tasks import update_site_feed, make_request
 from feeds.utils import feedopen
+import base64
+import celery
 import datetime
 import hashlib
-from django.template.defaultfilters import time as timefilter, date as datefilter
-import base64
 
+
+class SiteManager(BaseModelManager):
+    def need_checkup(self):
+        '''Returns what sites needs checking its status'''
+        allowed_max_last_update = timezone.now() - settings.MAX_UPDATE_WAIT
+        
+        return self.get_query_set().filter(
+            models.Q(feed_errors=0, last_update__lte=allowed_max_last_update)|
+            models.Q(task_id='')|
+            models.Q(task_id__isnull=True)
+        )
+        
 
 class Site(BaseModel):
     '''
@@ -26,7 +40,25 @@ class Site(BaseModel):
     url = models.URLField(null=True, blank=True)
     feed_url = models.URLField(unique=True) # No duplicated feed urls
     title = models.CharField(max_length=256, null=True, blank=True)
+    # Control fields
     feed_errors = models.IntegerField(default=0) # TODO: Inactivate sites with to much errors
+    last_update = models.DateTimeField()
+    task_id = models.CharField(default='', blank=True, null=True, max_length=36)
+    
+    objects = SiteManager()
+    
+    class Meta:
+        ordering = ('title',)
+        index_together = [
+            ['feed_errors', 'last_update'],
+        ]        
+    
+    @property
+    def task(self):
+        '''Returns the current task running this site'''
+        if not self.task_id:
+            return None
+        return update_site_feed.AsyncResult(self.task_id)
     
     
     def __unicode__(self):
@@ -45,7 +77,8 @@ class Site(BaseModel):
     def update_feed(self):
         # Celery has an contrib module to handle instance methods, but I've
         # never used it, so I don't know if we should trust if 
-        task = update_site_feed.delay(self)
+        update_site_feed.delay(self)
+        
         
         
     
@@ -100,10 +133,6 @@ class Site(BaseModel):
 
     def favicon(self):
         'TODO: This'
-
-
-    class Meta:
-        ordering = ('title',)
 
 
 

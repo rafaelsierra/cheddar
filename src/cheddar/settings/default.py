@@ -130,5 +130,11 @@ CELERY_ROUTES = {
     'feeds.tasks.parse_feed': {'queue': 'parse_feed'},
     'feeds.tasks.update_site_feed': {'queue': 'update_site_feed'},
 }
+CELERYBEAT_SCHEDULE = {
+    'check_sites_up': {
+        'task': 'feeds.tasks.check_sites_running',
+        'schedule': timedelta(hours=6),
+    },
+}
 import djcelery
 djcelery.setup_loader()

@@ -83,7 +83,8 @@ To run everything you will need at least 3 shells:
  * runserver
  * worker for updating feeds
  * worker for downloading and parsing stuffs
-
+ * Celery beat
+ 
 On shell 1:
 
     $ cd cheddar/
@@ -101,7 +102,7 @@ On shell 3:
 
     $ cd cheddar/
     $ source envs.sh
-    $ python manage.py celery worker -l WARN -Q make_request,parse_feed
+    $ python manage.py celery worker -B -l WARN -Q make_request,parse_feed
     
 
 Now you can create your superuser and access http://localhost:16001/admin/ and
