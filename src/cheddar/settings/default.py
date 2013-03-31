@@ -6,6 +6,7 @@ from datetime import timedelta
 PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
 
 CRAWLER_USER_AGENT = 'Cheddar Reader Crawler/1.0'
+CRAWLER_TIMEOUT = 30 # Avoid setting a high timeout, unless you can aford it
 
 MIN_UPDATE_INTERVAL_SECONDS = 600 # Updates at max 6 times per hour
 MIN_UPDATE_INTERVAL = timedelta(seconds=MIN_UPDATE_INTERVAL_SECONDS) 
@@ -124,5 +125,10 @@ LOGGING = {
 CELERY_IMPORTS = (
     'feeds.tasks',
 )
+CELERY_ROUTES = {
+    'feeds.tasks.make_request': {'queue': 'make_request'},
+    'feeds.tasks.parse_feed': {'queue': 'parse_feed'},
+    'feeds.tasks.update_site_feed': {'queue': 'update_site_feed'},
+}
 import djcelery
 djcelery.setup_loader()

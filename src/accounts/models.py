@@ -23,7 +23,7 @@ class UserSitePostsManager(BaseModelManager):
             
 
 class Folder(BaseModel):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='folders')
     name = models.CharField(max_length=32)
     
 

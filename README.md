@@ -1,13 +1,6 @@
 NOTE:
 =====
 
-This project is no near of working, we just started to coding it, there is no
-branches, nearly no tests or whatsoever, yet, you are free to join us :)
-
-And please, help us to keep all the code and commits single-languaged, yet the
-main commiters are Brazilian, we ask you to code in english only (except for the
-translation files, of course). 
-
 If you are good at writing tests, you are more than welcome to help us!
 
 
@@ -80,6 +73,40 @@ just run before `source envs.py`, like this:
     $ cd src
     $ python manage.py shell
     $ python manage.py celery worker -l ERROR
+
+
+Running the basics
+==================
+
+To run everything you will need at least 3 shells:
+
+ * runserver
+ * worker for updating feeds
+ * worker for downloading and parsing stuffs
+
+On shell 1:
+
+    $ cd cheddar/
+    $ ./runserver.sh
+    
+    
+On shell 2:
+
+    $ cd cheddar/
+    $ source envs.sh
+    $ python manage.py celery worker -l WARN -Q update_site_feed
+    
+
+On shell 3:
+
+    $ cd cheddar/
+    $ source envs.sh
+    $ python manage.py celery worker -l WARN -Q make_request,parse_feed
+    
+
+Now you can create your superuser and access http://localhost:16001/admin/ and
+add your subscriptions or go to http://localhost:16001/feeds/my/sites/import/
+and import your `subscriptions.xml` from Google Takeout.
      
 
 Note about SQLite

@@ -6,7 +6,7 @@
         <form action="{% url "accounts:login" %}" class="form-horizontal" method="post">
             {% csrf_token %}
             {% include "forms/horizontal.html" with form=form %}
-            <button class="btn btn-primary offset2">{% trans "Register" %}</button>
+            <button class="btn btn-primary offset2">{% trans "Login" %}</button>
         </form>
     </div>
 {% endblock %}

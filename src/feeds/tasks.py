@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-import feedparser
-import celery
-import urllib2
 from celery.contrib import rdb
+from django.conf import settings
+import celery
+import datetime
+import feedparser
 import ipdb
 import logging
-import datetime
 import time
+import urllib2
 
 logger = logging.getLogger('feeds.tasks')
 
@@ -14,13 +15,21 @@ logger = logging.getLogger('feeds.tasks')
 def make_request(request):
     '''Makes the request and returns a tuple (response.getcode(), 
         response.info(), response.read())'''
-    response = urllib2.urlopen(request)
+    try:
+        response = urllib2.urlopen(request, timeout=settings.CRAWLER_TIMEOUT)
+    except (urllib2.HTTPError, urllib2.URLError), e:
+        logger.error('Failed trying to download {}'.format(request.get_full_url()))
+        return -1, None, u''
+    
     return response.getcode(), response.info(), response.read()
     
     
 @celery.task()
 def parse_feed(rawdata):
     '''Parse the feed and returns whatever feedparser.parse returns'''
+    if rawdata[0] < 0:
+        # Error downloading feed
+        return {}
     return feedparser.parse(rawdata[2])
 
 
@@ -28,7 +37,7 @@ def parse_feed(rawdata):
 def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
-    from feeds.models import Post #
+    from feeds.models import Post 
     
     feed = site.getfeed()
     # Update this site info

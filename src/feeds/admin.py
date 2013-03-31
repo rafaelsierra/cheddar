@@ -8,7 +8,13 @@ class SiteAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)
     search_fields = ('title', 'url')
     readonly_fields = ('title', 'url')
+    actions = ['start_worker']
     
+    def start_worker(self, request, queryset):
+        for site in queryset:
+            site.update_feed()
+    start_worker.short_description = u"Start site's worker"
+        
     def next_update(self, instance):
         return instance.updated_at + datetime.timedelta(seconds=instance.next_update_eta())
     

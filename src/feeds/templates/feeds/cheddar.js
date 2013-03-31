@@ -42,13 +42,13 @@
                 navigation_state.current_post = $("#postlist article.post").first();
             }else{
                 if(next_or_previous == 'next'){
-                    var next =  navigation_state.current_post.next();
-                    if(next){
+                    var next = navigation_state.current_post.next();
+                    if(next.length>0){
                         navigation_state.current_post = next;
                     }
                 }else{
-                    var previous;
-                    if(previous){
+                    var previous = navigation_state.current_post.prev();
+                    if(previous.length>0){
                         navigation_state.current_post = previous;
                     }
                     
@@ -66,16 +66,36 @@
         
     var methods = {
         init: function(options){
+            // One Ring to bring them all and in the darkness bind them
+
+            // Reading posts event
             $("#postlist").on('click', 'article.post header', function(){
                 read_post($(this).parent());
+                // TODO: Auto load next page
             });
             
+            // Binds hotkeys
             $(document).bind('keypress', 'j', move_cursor_to_next);
             $(document).bind('keypress', 'k', move_cursor_to_previous);
             $(document).bind('keypress', 'r', function(){
                 $.cheddar('refresh');
             });
             
+            // TODO: I was planning to keep only one responsive HTML, but now
+            // I don't know exactly how (where in pixels) lock the sites bar,
+            // for now, let's lock all devices in the same place as desktop
+            $(document).scroll(function(){
+               var scrollTop = $(this).scrollTop();
+               var navBarHeight = $("div.navbar").height();
+               var leftBar = $("#feed-list").parent();
+               
+               if(scrollTop>navBarHeight){
+                   leftBar.addClass("locked").addClass('span2');
+               }else{
+                   leftBar.removeClass("locked").removeClass('span2');
+               } 
+               
+            });
             return this;
         },
         

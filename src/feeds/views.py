@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from accounts.models import UserSite
+from accounts.models import UserSite, Folder
 from base.views import LoginRequiredMixin
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -11,6 +11,10 @@ from django.views.generic.list import ListView
 from feeds.mixins import FeedListMixin
 from feeds.models import Site, Post
 import json
+from django.views.generic.edit import FormView
+from feeds.forms import ImportSubscriptionForm
+from django.core.urlresolvers import reverse_lazy
+import ipdb
 
 class HomeView(TemplateView, LoginRequiredMixin):
     template_name = 'feeds/home.html'
@@ -34,6 +38,31 @@ class UserSiteList(ListView, LoginRequiredMixin):
         queryset = queryset.filter(usersite__user=self.request.user)
         return queryset
         
+    
+class ImportSubscriptionsFormView(FormView, LoginRequiredMixin):
+    template_name = 'feeds/import.html'
+    form_class = ImportSubscriptionForm
+    success_url = reverse_lazy('feeds:import-success')
+    
+    def form_valid(self, form):
+        user = self.request.user
+        for feed in form.result.feeds:
+            site = Site.objects.get_or_create(feed_url=feed['url'], defaults={
+                'title':feed['title'],
+            })[0]
+            
+            # Links the user with site
+            usersite = user.my_sites.get_or_create(user=user, site=site)[0]
+            
+            # Currently only one folder per site is allowed
+            if feed['tags']:
+                tag = feed['tags'][0]
+                folder = user.folders.get_or_create(name=tag[:32])[0] # Trim at 32 chars
+                usersite.folder = folder
+                usersite.save()
+        return super(ImportSubscriptionsFormView, self).form_valid(form)
+                    
+                    
     
     
 class UserPostList(ListView, LoginRequiredMixin):

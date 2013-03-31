@@ -1,4 +1,18 @@
 @media screen and (min-width: 1200px) {
+    h2{
+        font-size: 22px;
+        line-height: 22px;
+    }
+    h2.inner-title{
+        margin-bottom: 0;
+    }
+    h3.inner-site{
+        font-size: 14px;
+        line-height: 14px;
+        font-weight: normal;
+        margin-top: 0;
+    }
+    
     #postlist header{
         cursor: pointer;
     }
@@ -25,8 +39,20 @@
     div.post-content{
         margin-top: 10px;
     }
+    
 }
 
+ul.locked{
+    position:fixed;
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
+    top:0;
+}
+
+article.post-read header span{
+    font-weight: normal;
+}
 article.post{
     background: white;
 }
@@ -40,6 +66,14 @@ div.post-content {
     word-wrap: normal;
 }
 
+#postlist header h1 .post-date {
+    overflow: hidden;
+    word-wrap: normal;
+    text-align: right;
+}
+
+
 article.post:target .post-content{
     display:block;    
+    overflow: hidden;
 }
