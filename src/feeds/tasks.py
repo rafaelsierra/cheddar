@@ -6,6 +6,7 @@ import datetime
 import feedparser
 import ipdb
 import logging
+import socket
 import time
 import urllib2
 
@@ -17,7 +18,7 @@ def make_request(request):
         response.info(), response.read())'''
     try:
         response = urllib2.urlopen(request, timeout=settings.CRAWLER_TIMEOUT)
-    except (urllib2.HTTPError, urllib2.URLError), e:
+    except (urllib2.HTTPError, urllib2.URLError, socket.timeout), e:
         logger.error('Failed trying to download {}'.format(request.get_full_url()))
         return -1, None, u''
     
@@ -65,11 +66,17 @@ def update_site_feed(site):
             # Try to get content
             if isinstance(entry.get('content'), list):
                 try:
-                    content = entry.get('content')[0]
+                    for content in entry['content']:
+                        if content:
+                            break
                 except IndexError:
                     content = u''
             else:
                 content = entry.get('content')
+                
+            if not content and 'description' in entry:
+                content = entry['description']
+                
                 
             if isinstance(content, dict):
                 content = content.get('value')
