@@ -34,7 +34,7 @@ def parse_feed(rawdata):
     return feedparser.parse(rawdata[2])
 
 
-@celery.task()
+@celery.task(ignore_result=True)
 def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''

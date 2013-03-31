@@ -59,19 +59,20 @@ class Site(BaseModel):
     
     def next_update_eta(self):
         '''Returns when this site should update again in seconds
-        This is a pretty simple function to calculate the average time between
+        This is a pretty simple function to calculate the average seconds between
         posts.
         '''
         intervals = []
-        for post in self.posts.all():
+        for post in self.posts.order_by('-captured_at'):
             # Checks if already have the desired intervals
             if len(intervals) >= settings.CHEDDAR_HISTORY_SIZE:
                 break
             
             # I don't know if this is a good thing
-            #if not intervals:
-            #    interval = timezone.now() - post.captured_at
-            #    intervals.append(interval.days*3600 + interval.seconds)
+            # Update: Turns out, it is
+            if not intervals:
+                interval = timezone.now() - post.captured_at
+                intervals.append(interval.days*3600 + interval.seconds)
                 
             try:
                 previous = post.get_previous_by_captured_at()
