@@ -30,32 +30,39 @@ def parse_feed(rawdata):
     '''Parse the feed and returns whatever feedparser.parse returns'''
     if rawdata[0] < 0:
         # Error downloading feed
-        return {}
+        return {'feed_error': True}
     return feedparser.parse(rawdata[2])
 
 
-@celery.task(ignore_result=True)
+@celery.task()
 def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
     from feeds.models import Post 
-    
     feed = site.getfeed()
     # Update this site info
     if not 'feed' in feed:
         logger.warn(u"Site {} feed did not returned feed information".format(site.id))
+        if 'feed_error' in feed:
+            logger.error('Site {} is with its feed url broken'.format(site.id))
+            # TODO: Create a task to use site.url to discover its new feed location
+            site.feed_errors += 1
+            site.save()
     else:
         info = feed['feed']
         if 'title' in info:
             site.title = info['title']
         if 'link' in info:
             site.url = info['link']
+        if site.feed_errors > 0:
+            site.feed_errors = 0
         site.save()
 
     # Create posts
     if not 'entries' in feed:
         logger.warn(u"Site {} feed did not returned any post".format(site.id))
     else:
+        new_posts_found = 0
         for entry in feed['entries']:
             # Without link we can't save this post
             if not 'link' in entry:
@@ -94,8 +101,12 @@ def update_site_feed(site):
                     'author': author,
                 }
             )
+            if created:
+                new_posts_found += 1
             post.created_at = created_at
             post.save()
-            
+    
+        logger.info('Site {site_id} got {new} new posts from {total} in feed'.format(site_id=site.id, new=new_posts_found, total=len(feed['entries'])))
+        
     # Schedule the next update
     update_site_feed.apply_async(args=(site,), countdown=site.next_update_eta())

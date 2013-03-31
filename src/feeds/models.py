@@ -26,6 +26,8 @@ class Site(BaseModel):
     url = models.URLField(null=True, blank=True)
     feed_url = models.URLField(unique=True) # No duplicated feed urls
     title = models.CharField(max_length=256, null=True, blank=True)
+    feed_errors = models.IntegerField(default=0) # TODO: Inactivate sites with to much errors
+    
     
     def __unicode__(self):
         if self.title:
@@ -43,7 +45,8 @@ class Site(BaseModel):
     def update_feed(self):
         # Celery has an contrib module to handle instance methods, but I've
         # never used it, so I don't know if we should trust if 
-        update_site_feed.delay(self)
+        task = update_site_feed.delay(self)
+        
         
     
     def save(self, *args, **kwargs):
