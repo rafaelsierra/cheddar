@@ -117,7 +117,11 @@ def update_site_feed(site):
         logger.info('Site {site_id} got {new} new posts from {total} in feed'.format(site_id=site.id, new=new_posts_found, total=len(feed['entries'])))
         
     # Schedule the next update
-    result = update_site_feed.apply_async(args=(site,), countdown=site.next_update_eta())
+    if site.feed_errors > settings.MAX_FEED_ERRORS_ALLOWED:
+        countdown = settings.MAX_UPDATE_INTERVAL_SECONDS
+    else:
+        countdown = site.next_update_eta()
+    result = update_site_feed.apply_async(args=(site,), countdown=countdown)
     
     # Updates site task_id
     site.task_id = result.id
