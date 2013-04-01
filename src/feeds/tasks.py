@@ -19,7 +19,7 @@ def make_request(request):
         response.info(), response.read())'''
     try:
         response = urllib2.urlopen(request, timeout=settings.CRAWLER_TIMEOUT)
-    except (urllib2.HTTPError, urllib2.URLError, socket.timeout), e:
+    except (urllib2.HTTPError, urllib2.URLError, socket.timeout, socket.error), e:
         logger.error('Failed trying to download {}'.format(request.get_full_url()))
         return -1, None, u''
     
@@ -32,7 +32,11 @@ def parse_feed(rawdata):
     if rawdata[0] < 0:
         # Error downloading feed
         return {'feed_error': True}
-    return feedparser.parse(rawdata[2])
+    result = feedparser.parse(rawdata[2])
+    if result.bozo > 0:
+        return {'feed_error': True}
+    else:
+        return result
 
 
 @celery.task()
@@ -92,9 +96,11 @@ def update_site_feed(site):
                 
             author = entry.get('author')
             
-            if 'published_parsed' in entry:
+            if 'published_parsed' in entry and entry.get('published_parsed'):
                 created_at = datetime.datetime.fromtimestamp(time.mktime(entry['published_parsed']))
-            
+            else:
+                created_at = timezone.now()
+                
             post, created = site.posts.get_or_create(url_hash=Post.hashurl(url),
                 defaults={
                     'title': title,

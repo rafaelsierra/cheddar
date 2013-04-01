@@ -1,20 +1,26 @@
 # -*- coding: utf-8 -*-
 from accounts.models import UserSite, Folder
 from base.views import LoginRequiredMixin
+from django.core.urlresolvers import reverse_lazy
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
+from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import TemplateView, View
+from django.views.generic.edit import FormView
 from django.views.generic.list import ListView
+from feeds.forms import ImportSubscriptionForm
 from feeds.mixins import FeedListMixin
 from feeds.models import Site, Post
-import json
-from django.views.generic.edit import FormView
-from feeds.forms import ImportSubscriptionForm
-from django.core.urlresolvers import reverse_lazy
+import base64
 import ipdb
+import json
+import logging
+import urllib2
+
+logger = logging.getLogger('feeds.views')
 
 class HomeView(TemplateView, LoginRequiredMixin):
     template_name = 'feeds/home.html'
@@ -104,3 +110,24 @@ class MarkPostAsRead(View, LoginRequiredMixin):
             response = {'success': True}
             
         return HttpResponse(json.dumps(response), content_type='application/json')
+
+   
+    
+DEFAULT_FAVICON = '''iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMA
+QObYZgAAAApJREFUCB1jYAAAAAIAAc/INeUAAAAASUVORK5CYII=
+'''
+@cache_page(3600*24*15)    
+def proxy_favicon(request, pk):
+    '''Downloads and cache site's favicon'''
+    # TODO: Better improve security here...
+    site = get_object_or_404(Site, id=pk)
+    if not site.url:
+        return HttpResponse(base64.decodestring(DEFAULT_FAVICON), content_type="image/png")
+
+    try:
+        favicon = urllib2.urlopen('{}/favicon.ico'.format(site.url).replace('//', '/'))
+    except Exception, e:
+        logger.exception('Failed to download site\'s favicon')
+        return HttpResponse(base64.decodestring(DEFAULT_FAVICON), content_type="image/png")
+    else:
+        return HttpResponse(favicon.read(), content_type=favicon.headers.get('Content-Type', 'image/x-icon'))

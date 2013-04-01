@@ -1,6 +1,7 @@
 {% load accountstags %}
 {% for site in object_list %}
-<li id="site-{{site.id}}">
-    <a href="#TODO">{{site.title}} <span class="badge badge-success unread-counter">{% show_unread_count_for_site %}</span></a>
-</li>
+    {% get_site_folder as folder %}
+    <li id="site-{{site.id}}" {% if folder %}data-folder="{{folder.name}}"{% endif %}>
+        <a href="#TODO"><img src="{% url 'feeds:proxy-favicon' pk=site.id %}" width="16" height="16" class="img-round"> {{site.title}} <span class="badge badge-success unread-counter">{% show_unread_count_for_site %}</span></a>
+    </li>
 {% endfor %}
