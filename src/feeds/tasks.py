@@ -10,6 +10,7 @@ import socket
 import time
 import urllib2
 from django.utils import timezone
+from django.utils.timezone import make_aware, get_current_timezone
 
 logger = logging.getLogger('feeds.tasks')
 
@@ -98,6 +99,7 @@ def update_site_feed(site):
             
             if 'published_parsed' in entry and entry.get('published_parsed'):
                 created_at = datetime.datetime.fromtimestamp(time.mktime(entry['published_parsed']))
+                created_at = make_aware(created_at, get_current_timezone())
             else:
                 created_at = timezone.now()
                 
