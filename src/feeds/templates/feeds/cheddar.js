@@ -21,8 +21,20 @@
     
     var navigation_state = {current_post:null};
 
+
+    /*
+     * Keeps content-wrapper's height updated so overscroll will work
+     * this function must be called on .ready and onwindowresize
+     */
+    function update_container_height(){
+        var height = window.innerHeight - $("#top-bar").height();
+        $("#postlist, #sites-container").height(height);
+    }
+    
+
     function read_post(article){
         // Open and mark post as read
+        $(".post-content").hide();
         var post_content = article.find('.post-content');
         var site = $("#site-"+article.data('site_id'));
         var counter = site.find('.unread-counter');
@@ -32,7 +44,10 @@
             $.cheddar('markAsRead', article.data("post_id"));
         }
         
-        window.location.hash = article.attr('id');
+        
+        post_content.show();
+        $("#postlist").overscroll({'direction':'vertical'});
+        $("#postlist").overscrollTo("#post-"+article.data("post_id"))
     }
     
     
@@ -81,21 +96,9 @@
                 $.cheddar('refresh');
             });
             
-            // TODO: I was planning to keep only one responsive HTML, but now
-            // I don't know exactly how (where in pixels) lock the sites bar,
-            // for now, let's lock all devices in the same place as desktop
-            $(document).scroll(function(){
-               var scrollTop = $(this).scrollTop();
-               var navBarHeight = $("div.navbar").height();
-               var leftBar = $("#feed-list").parent();
-               
-               if(scrollTop>navBarHeight){
-                   leftBar.addClass("locked").addClass('span2');
-               }else{
-                   leftBar.removeClass("locked").removeClass('span2');
-               } 
-               
-            });
+            // Container height
+            update_container_height();
+            $(window).resize(update_container_height);
             return this;
         },
         
@@ -108,6 +111,7 @@
                     $("#feed-list").siblings().remove();
                     // Loads the new one
                     $("#feed-list").parent().append(response);
+                    $("#sites-container").overscroll({direction:'vertical'});
                 }
             });
             return this;
@@ -125,6 +129,7 @@
                 'data': data, // That's why I hate this with javascript
                 success: function(response){
                     $("#postlist").append(response);
+                    $("#postlist").overscroll({'direction':'vertical'});
                     // Change all <a> to target=_blank
                     $("#postlist .post-content a").attr('target', '_blank');
                 },

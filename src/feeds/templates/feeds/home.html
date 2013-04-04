@@ -6,17 +6,20 @@
 {% block container %}
     <div class="row-fluid">
         <!-- Feeds menu -->
-        <div class="span2 hidden-phone">
-            <ul class="nav nav-list">
-                <li class="nav-header" id="feed-list">{% trans "Feeds" %}</li>
-            </ul>
+        <div id="left-bar" class="span2 hidden-phone" data-spy="affix">
+            <div id="sites-container">
+                <ul class="nav nav-list">
+                    <li class="nav-header" id="feed-list">{% trans "Feeds" %}</li>
+                </ul>
+            </div>
         </div>
         <!-- Feed content -->
-        <div class="span10" id="postlist"></div>
+        <div class="span9 offset2" id="postlist" data-spy="affix"></div>
     </div>
 {% endblock %}
 {% block extrascript %}
     <script src="{{STATIC_URL}}feeds/js/jquery.hotkeys.js"></script>
+    <script src="{{STATIC_URL}}feeds/js/jquery.overscroll.js"></script>
     <script src="{% url 'feeds:cheddarjs' %}"></script>
     <script src="{{STATIC_URL}}feeds/js/everything.js"></script>
 {% endblock %}    
