@@ -19,6 +19,7 @@ import ipdb
 import json
 import logging
 import urllib2
+from django.utils import timezone
 
 logger = logging.getLogger('feeds.views')
 
@@ -55,6 +56,7 @@ class ImportSubscriptionsFormView(FormView, LoginRequiredMixin):
         for feed in form.result.feeds:
             site = Site.objects.get_or_create(feed_url=feed['url'], defaults={
                 'title':feed['title'],
+                'last_update': timezone.now(),
             })[0]
             
             # Links the user with site
