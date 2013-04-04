@@ -14,7 +14,7 @@
             {# TODO: Change translation to a single call using blocktrans? #}
             {% trans "from" %} <a href="{{post.site.url}}" target="_blank">{{post.site.title}}</a>
             {% if post.author %}
-                {% trans "by" %}{{post.author}}
+                {% trans "by" %} {{post.author}}
             {% endif %}
         </h3>
         {{post.content|escape|safe}}
