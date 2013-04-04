@@ -11,6 +11,7 @@ import time
 import urllib2
 from django.utils import timezone
 from django.utils.timezone import make_aware, get_current_timezone
+from django.db.utils import IntegrityError
 
 logger = logging.getLogger('feeds.tasks')
 
@@ -102,19 +103,24 @@ def update_site_feed(site):
                 created_at = make_aware(created_at, get_current_timezone())
             else:
                 created_at = timezone.now()
-                
-            post, created = site.posts.get_or_create(url_hash=Post.hashurl(url),
-                defaults={
-                    'title': title,
-                    'url': url,
-                    'content': content,
-                    'author': author,
-                }
-            )
-            if created:
-                new_posts_found += 1
-            post.created_at = created_at
-            post.save()
+               
+            try: 
+                post, created = site.posts.get_or_create(url_hash=Post.hashurl(url),
+                    defaults={
+                        'title': title,
+                        'url': url,
+                        'content': content,
+                        'author': author,
+                    }
+                )
+            except IntegrityError:
+                # Raised when two posts have the same URL
+                pass
+            else:
+                if created:
+                    new_posts_found += 1
+                post.created_at = created_at
+                post.save()
     
         logger.info('Site {site_id} got {new} new posts from {total} in feed'.format(site_id=site.id, new=new_posts_found, total=len(feed['entries'])))
         
