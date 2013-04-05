@@ -17,6 +17,7 @@ import urllib2
 logger = get_task_logger(__name__)
 
 SITE_WORKER_CACHE_KEY = u'site-worker-{id}'
+CHECK_CACHE_KEY = 'check-sites-worker'
 
 @celery.task()
 def make_request(request):
@@ -48,6 +49,14 @@ def parse_feed(rawdata):
 def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
+    # Avoids running two instances at the time
+    cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
+    if cache.get(cachekey):
+        logger.warn('Worker for site {} still running'.format(site.id))
+        return
+    
+    cache.add(cachekey, '1', 60) # Will not run again in 60 seconds        
+    
     from feeds.models import Post
     # Update task_id for this site
     site.task_id = update_site_feed.request.id
@@ -144,25 +153,25 @@ def update_site_feed(site):
 @celery.task()
 def check_sites_for_update():
     '''Check if site's crawler should run'''
+    # Avoids running two instances at the time
+    if cache.get(CHECK_CACHE_KEY):
+        logger.warn('Worker for checking sites still running')
+        return
+    
+    cache.add(CHECK_CACHE_KEY, '1', 3600) # Will not run again for 1 hour
+    
     from feeds.models import Site
     sites = Site.objects.need_update()
         
     logger.info(u"There are {} sites that needs update".format(sites.count()))
     
     for site in sites:
-        # Avoids running two instances at the time
-        cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
-        if cache.get(cachekey):
-            logger.warn('Worker for site {} still running'.format(site.id))
-            continue
-        
-        cache.add(cachekey, '1', 60) # Will not run again in 60 seconds        
-        
         if not site.task or site.task.status in (u'SUCCESS', u'FAILURE', u'REVOKED'):
             logger.warn('Starting task for site {}'.format(site.id))
             site.update_feed()
         else:
             logger.warn('Tried to start another task for site {} but status is {}'.format(site.id, site.task.status))
-            
+    
+    cache.delete(CHECK_CACHE_KEY)
     
     
