@@ -108,7 +108,7 @@ def update_site_feed(site):
                     created_at = make_aware(created_at, get_current_timezone())
                 except AmbiguousTimeError,e:
                     logger.error('Failed when tring to make {} aware'.format(created_at))
-                    continue
+                    created_at = timezone.now()
             else:
                 created_at = timezone.now()
                
@@ -148,7 +148,7 @@ def check_sites_for_update():
     logger.info(u"There are {} sites that needs update".format(sites.count()))
     
     for site in sites:
-        if not site.task or site.task.status not in (u'PENDING', u'STARTED'):
+        if not site.task or site.task.status in (u'SUCCESS', u'FAILURE', u'REVOKED'):
             logger.warn('Starting task for site {}'.format(site.id))
             site.update_feed()
         else:
