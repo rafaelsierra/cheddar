@@ -48,14 +48,6 @@ def parse_feed(rawdata):
 def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
-    # Avoids running two instance at the time
-    cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
-    if cache.get(cachekey):
-        logger.warn('Worker for site {} still running'.format(site.id))
-        return False
-    
-    cache.add(cachekey, '1', 60) # Will not run again in 60 seconds
-    
     from feeds.models import Post
     # Update task_id for this site
     site.task_id = update_site_feed.request.id
@@ -158,6 +150,14 @@ def check_sites_for_update():
     logger.info(u"There are {} sites that needs update".format(sites.count()))
     
     for site in sites:
+        # Avoids running two instances at the time
+        cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
+        if cache.get(cachekey):
+            logger.warn('Worker for site {} still running'.format(site.id))
+            return False
+        
+        cache.add(cachekey, '1', 60) # Will not run again in 60 seconds        
+        
         if not site.task or site.task.status in (u'SUCCESS', u'FAILURE', u'REVOKED'):
             logger.warn('Starting task for site {}'.format(site.id))
             site.update_feed()
