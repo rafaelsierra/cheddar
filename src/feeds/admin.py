@@ -5,7 +5,7 @@ import datetime
 from django.utils import timezone
 
 class SiteAdmin(admin.ModelAdmin):
-    list_display = ('url', 'title', 'updated_at', 'last_update', 'next_update', 'feed_errors')
+    list_display = ('id', 'url', 'title', 'updated_at', 'last_update', 'next_update', 'feed_errors')
     list_filter = ('is_active',)
     search_fields = ('title', 'url')
     readonly_fields = ('title', 'url', 'next_update', 'last_update')
