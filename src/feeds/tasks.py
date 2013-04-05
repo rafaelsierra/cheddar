@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 from celery.contrib import rdb
+from celery.utils.log import get_task_logger
 from django.conf import settings
+from django.core.cache import cache
+from django.db.utils import IntegrityError
+from django.utils import timezone
+from django.utils.timezone import make_aware, get_current_timezone
+from pytz.exceptions import AmbiguousTimeError
 import celery
 import datetime
 import feedparser
 import socket
 import time
 import urllib2
-from django.utils import timezone
-from django.utils.timezone import make_aware, get_current_timezone
-from django.db.utils import IntegrityError
-from pytz.exceptions import AmbiguousTimeError
-from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
+
+SITE_WORKER_CACHE_KEY = u'site-worker-{id}'
 
 @celery.task()
 def make_request(request):
@@ -45,6 +48,14 @@ def parse_feed(rawdata):
 def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
+    # Avoids running two instance at the time
+    cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
+    if cache.get(cachekey):
+        logger.warn('Worker for site {} still running'.format(site.id))
+        return False
+    
+    cache.add(cachekey, '1', 60) # Will not run again in 60 seconds
+    
     from feeds.models import Post
     # Update task_id for this site
     site.task_id = update_site_feed.request.id
