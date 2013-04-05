@@ -148,11 +148,11 @@ def check_sites_for_update():
     logger.info(u"There are {} sites that needs update".format(sites.count()))
     
     for site in sites:
-        if not site.task or site.task.failed():
+        if not site.task or site.task.status not in (u'PENDING', u'STARTED'):
             logger.warn('Starting task for site {}'.format(site.id))
             site.update_feed()
         else:
-            logger.warn('Tried to start another task for site {} but it still running'.format(site.id))
+            logger.warn('Tried to start another task for site {} but status is {}'.format(site.id, site.task.status))
             
     
     
