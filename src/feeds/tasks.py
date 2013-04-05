@@ -154,7 +154,7 @@ def check_sites_for_update():
         cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
         if cache.get(cachekey):
             logger.warn('Worker for site {} still running'.format(site.id))
-            return False
+            continue
         
         cache.add(cachekey, '1', 60) # Will not run again in 60 seconds        
         
