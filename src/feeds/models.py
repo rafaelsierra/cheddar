@@ -19,15 +19,9 @@ import hashlib
 
 
 class SiteManager(BaseModelManager):
-    def need_checkup(self):
-        '''Returns what sites needs checking its status'''
-        allowed_max_last_update = timezone.now() - settings.MAX_UPDATE_WAIT
-        
-        return self.get_query_set().filter(
-            models.Q(feed_errors=0, last_update__lte=allowed_max_last_update)|
-            models.Q(task_id='')|
-            models.Q(task_id__isnull=True)
-        )
+    def need_update(self):
+        '''Returns what sites needs update'''
+        return self.get_query_set().filter(next_update__lte=timezone.now())
         
 
 class Site(BaseModel):
@@ -43,6 +37,7 @@ class Site(BaseModel):
     # Control fields
     feed_errors = models.IntegerField(default=0) # TODO: Inactivate sites with to much errors
     last_update = models.DateTimeField()
+    next_update = models.DateTimeField(auto_now_add=True, db_index=True)
     task_id = models.CharField(default='', blank=True, null=True, max_length=36)
     
     objects = SiteManager()
@@ -78,9 +73,7 @@ class Site(BaseModel):
         # Celery has an contrib module to handle instance methods, but I've
         # never used it, so I don't know if we should trust if 
         update_site_feed.delay(self)
-        
-        
-        
+
     
     def save(self, *args, **kwargs):
         '''Force model validation'''
@@ -93,8 +86,10 @@ class Site(BaseModel):
         return feedopen(self.feed_url)
 
     
-    def next_update_eta(self):
-        '''Returns when this site should update again in seconds
+    def set_next_update(self, save=True):
+        '''
+        Calculates when this site should update again.
+        
         This is a pretty simple function to calculate the average seconds between
         posts.
         '''
@@ -128,8 +123,12 @@ class Site(BaseModel):
             eta = settings.MIN_UPDATE_INTERVAL_SECONDS
         elif eta > settings.MAX_UPDATE_INTERVAL_SECONDS:
             eta = settings.MAX_UPDATE_INTERVAL_SECONDS
-        return eta
-
+            
+        self.next_update = timezone.now()+datetime.timedelta(seconds=eta)
+        if save:
+            self.save()
+        return self.next_update
+    
 
     def favicon(self):
         'TODO: This'

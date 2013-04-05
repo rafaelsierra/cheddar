@@ -12,6 +12,7 @@ import urllib2
 from django.utils import timezone
 from django.utils.timezone import make_aware, get_current_timezone
 from django.db.utils import IntegrityError
+from pytz.exceptions import AmbiguousTimeError
 
 logger = logging.getLogger('feeds.tasks')
 
@@ -46,6 +47,9 @@ def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
     from feeds.models import Post
+    # Update task_id for this site
+    site.task_id = update_site_feed.request.id
+    site.save()
     
     feed = site.getfeed()
     # Update this site info
@@ -100,7 +104,11 @@ def update_site_feed(site):
             
             if 'published_parsed' in entry and entry.get('published_parsed'):
                 created_at = datetime.datetime.fromtimestamp(time.mktime(entry['published_parsed']))
-                created_at = make_aware(created_at, get_current_timezone())
+                try:
+                    created_at = make_aware(created_at, get_current_timezone())
+                except AmbiguousTimeError,e:
+                    logger.error('Failed when tring to make {} aware'.format(created_at))
+                    continue
             else:
                 created_at = timezone.now()
                
@@ -124,31 +132,27 @@ def update_site_feed(site):
     
         logger.info('Site {site_id} got {new} new posts from {total} in feed'.format(site_id=site.id, new=new_posts_found, total=len(feed['entries'])))
         
-    # Schedule the next update
-    if site.feed_errors > settings.MAX_FEED_ERRORS_ALLOWED:
-        countdown = settings.MAX_UPDATE_INTERVAL_SECONDS
-    else:
-        countdown = site.next_update_eta()
-    result = update_site_feed.apply_async(args=(site,), countdown=countdown)
-    
-    # Updates site task_id
-    site.task_id = result.id
+    # Updates when is it to run again
+    next_update = site.set_next_update(save=False)
+    logger.info("Site's {} next update at {}".format(site.id, next_update))
     site.last_update = timezone.now()
     site.save()    
     
     
 @celery.task()
-def check_sites_running():
-    '''Check if site's crawler is still running'''
+def check_sites_for_update():
+    '''Check if site's crawler should run'''
     from feeds.models import Site
-    sites = Site.objects.need_checkup()
+    sites = Site.objects.need_update()
         
-    logger.info(u"Checking {} sites which aren't running".format(sites.count()))
+    logger.info(u"There are {} sites that needs update".format(sites.count()))
     
     for site in sites:
         if not site.task or site.task.failed():
             logger.warn('Starting task for site {}'.format(site.id))
             site.update_feed()
+        else:
+            logger.warn('Tried to start another task for site {} but it still running'.format(site.id))
             
     
     

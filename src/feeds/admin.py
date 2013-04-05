@@ -2,21 +2,20 @@
 from django.contrib import admin
 from feeds.models import Site, Post
 import datetime
+from django.utils import timezone
 
 class SiteAdmin(admin.ModelAdmin):
-    list_display = ('url', 'title', 'updated_at', 'last_update', 'feed_errors')
+    list_display = ('url', 'title', 'updated_at', 'last_update', 'next_update', 'feed_errors')
     list_filter = ('is_active',)
     search_fields = ('title', 'url')
-    readonly_fields = ('title', 'url')
-    actions = ['start_worker']
+    readonly_fields = ('title', 'url', 'next_update', 'last_update')
+    actions = ['force_worker']
     
-    def start_worker(self, request, queryset):
+    def force_worker(self, request, queryset):
         for site in queryset:
-            site.update_feed()
-    start_worker.short_description = u"Start site's worker"
-        
-    def next_update(self, instance):
-        return instance.updated_at + datetime.timedelta(seconds=instance.next_update_eta())
+            site.next_update = timezone.now()-datetime.timedelta(hours=24)
+            site.save()
+    force_worker.short_description = u"Force another site worker"
     
 
 class PostAdmin(admin.ModelAdmin):

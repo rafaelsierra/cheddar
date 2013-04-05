@@ -1,12 +1,24 @@
 {% extends "base.html" %}
 {% load i18n %}
+
 {% block extrahead %}
     <link rel="stylesheet" href="{{STATIC_URL}}feeds/css/styles.css">
 {% endblock %}
+
+{% block navbar-items %}
+    <li class="divider-vertical"></li>
+{% endblock %}
+
 {% block container %}
     <div class="row-fluid">
         <!-- Feeds menu -->
         <div id="left-bar" class="span2 hidden-phone" data-spy="affix">
+            <div class="btn-toolbar">
+                <div class="btn-group">
+                    <button class="btn" title="{% trans "Mark all as read" %}"><i class="icon-eye-open"></i></button>
+                    <button class="btn" title="{% trans "Refresh" %}"><i class="icon-refresh"></i></button>
+                </div>
+            </div>
             <div id="sites-container">
                 <ul class="nav nav-list">
                     <li class="nav-header" id="feed-list">{% trans "Feeds" %}</li>

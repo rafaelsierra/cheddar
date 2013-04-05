@@ -134,8 +134,8 @@ CELERY_ROUTES = {
 }
 CELERYBEAT_SCHEDULE = {
     'check_sites_up': {
-        'task': 'feeds.tasks.check_sites_running',
-        'schedule': timedelta(hours=6),
+        'task': 'feeds.tasks.check_sites_for_update',
+        'schedule': timedelta(seconds=60),
     },
 }
 import djcelery
