@@ -16,7 +16,10 @@ import base64
 import celery
 import datetime
 import hashlib
+import logging
 
+
+logger = logging.getLogger('feeds.tasks')
 
 class SiteManager(BaseModelManager):
     def need_update(self):
@@ -37,7 +40,7 @@ class Site(BaseModel):
     # Control fields
     feed_errors = models.IntegerField(default=0) # TODO: Inactivate sites with to much errors
     last_update = models.DateTimeField()
-    next_update = models.DateTimeField(auto_now_add=True, db_index=True)
+    next_update = models.DateTimeField(db_index=True)
     task_id = models.CharField(default='', blank=True, null=True, max_length=36)
     
     objects = SiteManager()
@@ -65,6 +68,10 @@ class Site(BaseModel):
     
     def clean(self):
         # TODO: check if feed_url is a valid feed
+        
+        # next_update must be editable
+        if not self.next_update:
+            self.next_update = timezone.now()-datetime.timedelta(hours=24)
         pass
     
 
@@ -116,14 +123,14 @@ class Site(BaseModel):
             
         # Put eta somewhere between min and max time
         if not intervals:
-            return settings.MIN_UPDATE_INTERVAL_SECONDS
-        
-        eta = sum(intervals)/len(intervals)
-        if eta < settings.MIN_UPDATE_INTERVAL_SECONDS:
             eta = settings.MIN_UPDATE_INTERVAL_SECONDS
-        elif eta > settings.MAX_UPDATE_INTERVAL_SECONDS:
-            eta = settings.MAX_UPDATE_INTERVAL_SECONDS
-            
+        else:
+            eta = sum(intervals)/len(intervals)
+            if eta < settings.MIN_UPDATE_INTERVAL_SECONDS:
+                eta = settings.MIN_UPDATE_INTERVAL_SECONDS
+            elif eta > settings.MAX_UPDATE_INTERVAL_SECONDS:
+                eta = settings.MAX_UPDATE_INTERVAL_SECONDS
+        
         self.next_update = timezone.now()+datetime.timedelta(seconds=eta)
         if save:
             self.save()

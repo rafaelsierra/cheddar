@@ -4,8 +4,6 @@ from django.conf import settings
 import celery
 import datetime
 import feedparser
-import ipdb
-import logging
 import socket
 import time
 import urllib2
@@ -13,8 +11,9 @@ from django.utils import timezone
 from django.utils.timezone import make_aware, get_current_timezone
 from django.db.utils import IntegrityError
 from pytz.exceptions import AmbiguousTimeError
+from celery.utils.log import get_task_logger
 
-logger = logging.getLogger('feeds.tasks')
+logger = get_task_logger(__name__)
 
 @celery.task()
 def make_request(request):
