@@ -49,6 +49,12 @@
         window.location.hash = 'post-'+article.data('post_id');
         window.scrollBy(0, -55);
         
+        var unread_posts = $("#postlist article:not(.post-read)");
+        if(unread_posts.length == 0){
+            post_list_state.page++;
+            $.cheddar('loadPosts');
+        }
+        
     }
     
     
@@ -87,7 +93,6 @@
             // Reading posts event
             $("#postlist").on('click', 'article.post header', function(){
                 read_post($(this).parent());
-                // TODO: Auto load next page
             });
             
             // Binds hotkeys
