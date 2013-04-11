@@ -26,7 +26,6 @@
 
     function update_container_height(){
         var height = window.innerHeight - $("#top-bar").height();
-        console.log(height);
         $("#postlist, #left-bar").height(height);
     }
     
@@ -117,9 +116,33 @@
                     $("#feed-list").siblings().remove();
                     // Loads the new one
                     $("#feed-list").parent().append(response);
+                    $.cheddar('updateFolders');
                 }
             });
             return this;
+        },
+        
+        updateFolders: function(){
+            var folders = {}; // List of folders
+            var sites = $("#sites-container li");
+            
+            // Load folders
+            $.each(sites, function(i, site){   
+                site = $(site);         
+                if(!site.data('folder')){ return; }
+                
+                var id = site.data('folder_id');
+                folders[id] = site.data('folder');
+            });
+            
+            // Create folders into list
+            $.each(folders, function(id, folder){
+                var li = '<li id="folder-'+id+'" class="site-folder"><a href="#todo"><i class="icon-folder-close"></i> '+folder+'</a><ul></ul></li>';
+                $(li).insertAfter("#feed-list");
+                $("#sites-container li[data-folder_id="+id+"]").detach().appendTo("#folder-"+id+' ul');
+                $("#folder-"+id+" ul").hide();
+            });
+            
         },
         
         loadPosts: function(){
