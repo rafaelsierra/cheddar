@@ -1,7 +1,4 @@
 @media screen and (min-width: 1200px) {
-    body{
-        overflow: hidden;
-    }
     h2{
         font-size: 22px;
         line-height: 22px;
@@ -30,7 +27,7 @@
     }
 
     body > div.container-fluid {
-        margin-top: 45px;
+        margin-top: 56px;
     }
 
     article.post {
@@ -42,7 +39,9 @@
     div.post-content{
         margin-top: 10px;
     }
-    
+    #left-bar:hover{
+        overflow: auto;
+    }
 }
 
 article.post-read header span{
@@ -52,7 +51,7 @@ article.post{
     background: white;
 }
 
-div.post-content {
+div.paost-content {
     display: none;
 }
 
@@ -67,7 +66,14 @@ div.post-content {
     text-align: right;
 }
 
+#postlist article.active{
+    border-color: #FFC60A;
+    -moz-box-shadow: 0 0 5px #FFC60A;
+    -webkit-box-shadow: 0 0 5px #FFC60A;
+    box-shadow: 0 0 5px #FFC60A;
+}
 
 article.post .post-content{
     overflow: hidden;
 }
+

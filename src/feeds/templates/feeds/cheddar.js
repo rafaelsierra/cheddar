@@ -19,22 +19,24 @@
         site: null,
     };
     
+    var sitelist_ovescroll_config = {direction:'vertical', hoverThumbs: true}
+    
     var navigation_state = {current_post:null};
 
 
-    /*
-     * Keeps content-wrapper's height updated so overscroll will work
-     * this function must be called on .ready and onwindowresize
-     */
     function update_container_height(){
         var height = window.innerHeight - $("#top-bar").height();
-        $("#postlist, #sites-container").height(height);
+        console.log(height);
+        $("#postlist, #left-bar").height(height);
     }
     
 
     function read_post(article){
+        // TODO: Collapsable posts
+        
         // Open and mark post as read
-        $(".post-content").hide();
+        $("#postlist .active").removeClass("active");
+        article.addClass("active");
         var post_content = article.find('.post-content');
         var site = $("#site-"+article.data('site_id'));
         var counter = site.find('.unread-counter');
@@ -44,10 +46,9 @@
             $.cheddar('markAsRead', article.data("post_id"));
         }
         
+        window.location.hash = 'post-'+article.data('post_id');
+        window.scrollBy(0, -55);
         
-        post_content.show();
-        $("#postlist").overscroll({'direction':'vertical'});
-        $("#postlist").overscrollTo("#post-"+article.data("post_id"))
     }
     
     
@@ -111,7 +112,6 @@
                     $("#feed-list").siblings().remove();
                     // Loads the new one
                     $("#feed-list").parent().append(response);
-                    $("#sites-container").overscroll({direction:'vertical'});
                 }
             });
             return this;
@@ -129,7 +129,6 @@
                 'data': data, // That's why I hate this with javascript
                 success: function(response){
                     $("#postlist").append(response);
-                    $("#postlist").overscroll({'direction':'vertical'});
                     // Change all <a> to target=_blank
                     $("#postlist .post-content a").attr('target', '_blank');
                 },

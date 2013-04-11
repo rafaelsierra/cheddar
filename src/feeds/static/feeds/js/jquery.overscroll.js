@@ -764,8 +764,8 @@
         }
         var position = selector.position();
         var data = this.data("overscroll");
-        this.scrollTop(position.top);
-        this.scrollLeft(position.left);
+        this.scrollTop(position.top*(1+data.sizing.container.height / data.sizing.container.scrollHeight));
+        this.scrollLeft(position.left*(1+data.sizing.container.width / data.sizing.container.scrollWidth));
         return this;
     }
 
