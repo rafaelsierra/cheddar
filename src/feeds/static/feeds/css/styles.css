@@ -44,6 +44,9 @@
     }
 }
 
+a{cursor: pointer;}
+
+
 article.post-read header span{
     font-weight: normal;
 }
@@ -76,4 +79,5 @@ div.paost-content {
 article.post .post-content{
     overflow: hidden;
 }
+
 

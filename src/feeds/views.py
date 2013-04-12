@@ -4,6 +4,7 @@ from base.views import LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy
 from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import cache_page
@@ -19,7 +20,6 @@ import ipdb
 import json
 import logging
 import urllib2
-from django.utils import timezone
 
 logger = logging.getLogger('feeds.views')
 
@@ -85,16 +85,25 @@ class UserPostList(ListView, LoginRequiredMixin):
             return Site.objects.get(id=self.request.REQUEST['site'])
         
     
+    def get_folder(self):
+        '''Returns folder instance if set or None'''
+        if 'folder' in self.request.REQUEST:
+            return Folder.objects.get(id=self.request.REQUEST['folder'])    
+    
+    
     def get_queryset(self):
         is_read = self.kwargs.get('is_read', False)
         if is_read:
             queryset = UserSite.posts.read(self.request.user)
         else:
             queryset = UserSite.posts.unread(self.request.user)
-        
+
+        # You can't filter both at once        
         if self.get_site():
             queryset = queryset.filter(site=self.get_site())
-        
+        elif self.get_folder():
+            queryset = queryset.filter(site__usersite__folder=self.get_folder())
+            
         return queryset
     
 

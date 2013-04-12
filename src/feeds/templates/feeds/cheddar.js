@@ -17,6 +17,7 @@
         is_read: false,
         page: 1,
         site: null,
+        folder: null,
     };
     
     var sitelist_ovescroll_config = {direction:'vertical', hoverThumbs: true}
@@ -84,6 +85,10 @@
     function move_cursor_to_previous(){
         move_cursor_to('previous');
     }
+    
+    function clear_posts(){
+        $("#postlist").html('');
+    }
         
     var methods = {
         init: function(options){
@@ -92,6 +97,31 @@
             // Reading posts event
             $("#postlist").on('click', 'article.post header', function(){
                 read_post($(this).parent());
+            });
+            
+            $("#sites-container").on('click', '.site-button', function(){
+                // Loads posts only from this site
+                clear_posts();
+                post_list_state.folder = null;
+                post_list_state.page = 1;
+                post_list_state.site = $(this).data('site');
+                $.cheddar('loadPosts');
+            })
+            
+            
+            $("#sites-container").on('click', '.site-folder a', function(){
+                // Loads posts only from this folder
+                clear_posts();
+                post_list_state.folder = $(this).data('folder');
+                post_list_state.page = 1;
+                post_list_state.site = null;
+                $.cheddar('loadPosts');
+            })
+            
+            
+            $("#sites-container").on('click', '.site-folder i', function(){
+                $(this).toggleClass('icon-folder-open').toggleClass('icon-folder-close')
+                $(this).parent().parent().find('ul').slideToggle();
             });
             
             // Binds hotkeys
@@ -137,7 +167,7 @@
             
             // Create folders into list
             $.each(folders, function(id, folder){
-                var li = '<li id="folder-'+id+'" class="site-folder"><a href="#todo"><i class="icon-folder-close"></i> '+folder+'</a><ul></ul></li>';
+                var li = '<li id="folder-'+id+'" class="site-folder"><a href="javascript:void(0);" data-folder="'+id+'"><i class="icon-folder-close folder-button"></i> '+folder+'</a><ul class="nav nav-list"></ul></li>';
                 $(li).insertAfter("#feed-list");
                 $("#sites-container li[data-folder_id="+id+"]").detach().appendTo("#folder-"+id+' ul');
                 $("#folder-"+id+" ul").hide();
@@ -149,7 +179,9 @@
             var data = {};
             data['page'] = post_list_state.page;
             if(post_list_state.site){
-                site['site'] = post_list_state.site;
+                data['site'] = post_list_state.site;
+            }else if(post_list_state.folder){
+                data['folder'] = post_list_state.folder; 
             }
             
             $.ajax({
