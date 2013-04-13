@@ -100,37 +100,43 @@ class Site(BaseModel):
         This is a pretty simple function to calculate the average seconds between
         posts.
         '''
-        intervals = []
-        for post in self.posts.order_by('-captured_at'):
-            # Checks if already have the desired intervals
-            if len(intervals) >= settings.CHEDDAR_HISTORY_SIZE:
-                break
-            
-            # I don't know if this is a good thing
-            # Update: Turns out, it is
-            if not intervals:
-                interval = timezone.now() - post.captured_at
+        
+        if self.feed_errors > settings.MAX_FEED_ERRORS_ALLOWED:
+            # if this site is returning to much errors, just set it for the max 
+            # time allowed
+            eta = settings.MAX_UPDATE_INTERVAL_SECONDS
+        else:
+            intervals = []
+            for post in self.posts.order_by('-captured_at'):
+                # Checks if already have the desired intervals
+                if len(intervals) >= settings.CHEDDAR_HISTORY_SIZE:
+                    break
+                
+                # I don't know if this is a good thing
+                # Update: Turns out, it is
+                if not intervals:
+                    interval = timezone.now() - post.captured_at
+                    intervals.append(interval.days*3600 + interval.seconds)
+                    
+                try:
+                    previous = post.get_previous_by_captured_at()
+                except Post.DoesNotExist:
+                    # End of Posts
+                    break
+                
+                interval = post.captured_at - previous.captured_at
                 intervals.append(interval.days*3600 + interval.seconds)
                 
-            try:
-                previous = post.get_previous_by_captured_at()
-            except Post.DoesNotExist:
-                # End of Posts
-                break
-            
-            interval = post.captured_at - previous.captured_at
-            intervals.append(interval.days*3600 + interval.seconds)
-            
-        # Put eta somewhere between min and max time
-        if not intervals:
-            eta = settings.MIN_UPDATE_INTERVAL_SECONDS
-        else:
-            eta = sum(intervals)/len(intervals)
-            if eta < settings.MIN_UPDATE_INTERVAL_SECONDS:
+            # Put eta somewhere between min and max time
+            if not intervals:
                 eta = settings.MIN_UPDATE_INTERVAL_SECONDS
-            elif eta > settings.MAX_UPDATE_INTERVAL_SECONDS:
-                eta = settings.MAX_UPDATE_INTERVAL_SECONDS
-        
+            else:
+                eta = sum(intervals)/len(intervals)
+                if eta < settings.MIN_UPDATE_INTERVAL_SECONDS:
+                    eta = settings.MIN_UPDATE_INTERVAL_SECONDS
+                elif eta > settings.MAX_UPDATE_INTERVAL_SECONDS:
+                    eta = settings.MAX_UPDATE_INTERVAL_SECONDS
+            
         self.next_update = timezone.now()+datetime.timedelta(seconds=eta)
         if save:
             self.save()

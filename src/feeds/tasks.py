@@ -171,6 +171,12 @@ def check_sites_for_update():
             site.update_feed()
         else:
             logger.warn('Tried to start another task for site {} but status is {}'.format(site.id, site.task.status))
+            if site.last_update < timezone.now()-settings.MAX_UPDATE_WAIT:
+                logger.error('Site {} has been running for more time than allowed, revoking task to start another next time'.format(site.id))
+                # Revoke site's task and clear its task_id
+                site.task.revoke()
+                site.task_id = None
+                site.save()
     
     cache.delete(CHECK_CACHE_KEY)
     
