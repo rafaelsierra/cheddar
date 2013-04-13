@@ -1,22 +1,22 @@
 @media screen and (min-width: 1200px) {
-    h2{
+    h2 {
         font-size: 22px;
         line-height: 22px;
     }
-    h2.inner-title{
+    h2.inner-title {
         margin-bottom: 0;
     }
-    h3.inner-site{
+    h3.inner-site {
         font-size: 14px;
         line-height: 14px;
         font-weight: normal;
         margin-top: 0;
     }
-    
-    #postlist header{
+
+    #postlist header {
         cursor: pointer;
     }
-    
+
     #postlist header h1 {
         font-size: small;
         display: block;
@@ -35,22 +35,69 @@
         min-height: 16px;
         margin-bottom: 4px;
     }
-    
-    div.post-content{
+
+    div.post-content {
         margin-top: 10px;
     }
-    #left-bar:hover{
+    #left-bar:hover {
         overflow: auto;
     }
 }
 
-a{cursor: pointer;}
+@media screen and (max-width: 1199px) {
+    h2 {
+        font-size: 22px;
+        line-height: 22px;
+    }
+    h2.inner-title {
+        margin-bottom: 0;
+    }
+    h3.inner-site {
+        font-size: 14px;
+        line-height: 14px;
+        font-weight: normal;
+        margin-top: 0;
+    }
 
+    #postlist header {
+        cursor: pointer;
+    }
 
-article.post-read header span{
+    #postlist header h1 {
+        font-size: small;
+        display: block;
+        overflow: hidden;
+        line-height: 15px;
+        height: 15px;
+        margin: 0;
+    }
+
+    body > div.container-fluid {
+        margin-top: 56px;
+    }
+
+    article.post {
+        padding: 5px 10px;
+        min-height: 16px;
+        margin-bottom: 4px;
+    }
+
+    div.post-content {
+        margin-top: 10px;
+    }
+    #left-bar:hover {
+        overflow: auto;
+    }
+}
+
+a {
+    cursor: pointer;
+}
+
+article.post-read header span {
     font-weight: normal;
 }
-article.post{
+article.post {
     background: white;
 }
 
@@ -69,18 +116,18 @@ div.paost-content {
     text-align: right;
 }
 
-#postlist article.active{
+#postlist article.active {
     border-color: #FFC60A;
     -moz-box-shadow: 0 0 5px #FFC60A;
     -webkit-box-shadow: 0 0 5px #FFC60A;
     box-shadow: 0 0 5px #FFC60A;
 }
 
-article.post .post-content{
+article.post .post-content {
     overflow: hidden;
 }
 
-.star-post{
+.star-post {
     cursor: pointer;
 }
 
