@@ -58,6 +58,7 @@ class ImportSubscriptionsFormView(FormView, LoginRequiredMixin):
             site = Site.objects.get_or_create(feed_url=feed['url'], defaults={
                 'title':feed['title'],
                 'last_update': timezone.now(),
+                'next_update': timezone.now(),
             })[0]
             
             # Links the user with site
@@ -123,6 +124,17 @@ class MarkPostAsRead(View, LoginRequiredMixin, SingleObjectMixin):
             
         return HttpResponse(json.dumps(response), content_type='application/json')
 
+
+class MarkAllAsRead(View, LoginRequiredMixin):
+    '''Dude, this can take forever...'''
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super(StarPost, self).dispatch(*args, **kwargs)
+    
+    def post(self):
+        for post in UserSite.posts.unread(self.request.user):
+            post.mark_as_read(self.request.user)
+    
 
 class StarPost(View, LoginRequiredMixin, SingleObjectMixin):
     '''Star the post of user'''
