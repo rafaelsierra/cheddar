@@ -80,4 +80,7 @@ article.post .post-content{
     overflow: hidden;
 }
 
+.star-post{
+    cursor: pointer;
+}
 

@@ -10,7 +10,8 @@
         'mysites': "{% url 'feeds:my-sites' %}",
         'post_list_read': "{% url 'feeds:post-list-read' %}",
         'post_list_unread': "{% url 'feeds:post-list-unread' %}",
-        'mark_post_as_read': "{% url 'feeds:post-mark-as-read' %}"
+        'mark_post_as_read': "{% url 'feeds:post-mark-as-read' %}",
+        'star_post': function(postId){return "{% url 'feeds:post-star-it' pk='POSTID' %}".replace('POSTID', postId);}
     };
     
     var post_list_state = {
@@ -57,6 +58,17 @@
         
     }
     
+    function star_post(article){
+        var postId = article.data("post_id");
+        $.ajax({
+            url:urls.star_post(postId),
+            type:'POST',
+            success: function(response){
+                article.find('.star-post i').toggleClass('icon-star').toggleClass('icon-star-empty');
+            },
+            dataType:'json'
+        });
+    }
     
     function move_cursor_to(next_or_previous){
             var current_post;  
@@ -82,6 +94,7 @@
     function move_cursor_to_next(){
         move_cursor_to('next');
     }
+    
     function move_cursor_to_previous(){
         move_cursor_to('previous');
     }
@@ -97,6 +110,15 @@
             // Reading posts event
             $("#postlist").on('click', 'article.post header', function(){
                 read_post($(this).parent());
+            });
+            
+            $("#postlist").on('click', '.star-post', function(){
+                var tag = $(this).parent();
+                // Travese DOM tree backwards to find where is the article
+                while(tag.prop('tagName')!='ARTICLE'){
+                    tag = tag.parent();
+                }
+                star_post(tag)
             });
             
             $("#sites-container").on('click', '.site-button', function(){
@@ -127,6 +149,11 @@
             // Binds hotkeys
             $(document).bind('keypress', 'j', move_cursor_to_next);
             $(document).bind('keypress', 'k', move_cursor_to_previous);
+            $(document).bind('keypress', 's', function(){
+                if(navigation_state.current_post){
+                    star_post(navigation_state.current_post);
+                }
+            });
             $(document).bind('keypress', 'r', function(){
                 $.cheddar('refresh');
             });

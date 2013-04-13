@@ -2,7 +2,7 @@
 from accounts.models import UserSite, Folder
 from base.views import LoginRequiredMixin
 from django.core.urlresolvers import reverse_lazy
-from django.http.response import HttpResponse
+from django.http.response import HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -20,6 +20,7 @@ import ipdb
 import json
 import logging
 import urllib2
+from django.views.generic.detail import SingleObjectMixin
 
 logger = logging.getLogger('feeds.views')
 
@@ -107,7 +108,7 @@ class UserPostList(ListView, LoginRequiredMixin):
         return queryset
     
 
-class MarkPostAsRead(View, LoginRequiredMixin):
+class MarkPostAsRead(View, LoginRequiredMixin, SingleObjectMixin):
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(MarkPostAsRead, self).dispatch(*args, **kwargs)
@@ -122,6 +123,27 @@ class MarkPostAsRead(View, LoginRequiredMixin):
             
         return HttpResponse(json.dumps(response), content_type='application/json')
 
+
+class StarPost(View, LoginRequiredMixin, SingleObjectMixin):
+    '''Star the post of user'''
+    model = Post
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super(StarPost, self).dispatch(*args, **kwargs)
+
+    
+    def post(self, request, *args, **kwargs):
+        post = self.get_object()
+        if not post:
+            return HttpResponseNotFound()
+        user = request.user
+        userpost = post.get_userpost(user)
+        # Just switch it and returns whatever new status is
+        userpost.is_starred = not userpost.is_starred
+        userpost.save()
+        response = {'id': post.id, 'is_starred': userpost.is_starred}
+        return HttpResponse(json.dumps(response), content_type='application/json')
+    
    
     
 DEFAULT_FAVICON = '''iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMA

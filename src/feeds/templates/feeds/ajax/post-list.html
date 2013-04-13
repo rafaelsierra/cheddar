@@ -1,23 +1,29 @@
 {% load i18n %}
+{% load feedstags %}
 {% for post in posts %}
-<article class="post well" id="post-{{post.id}}" data-post_id="{{post.id}}" data-site_id="{{post.site.id}}">
-    <header>
-        <h1>
-            <span class="post-site span2">{{post.site.title}}</span>
-            <span class="span6">{{post.title|escape|safe}}</span>
-            <span class="post-date span2 pull-right">{{post.captured_at_display}}</span>
-        </h1>
-    </header>
-    <div class="post-content">
-        <h2 class="inner-title"><a href="{{post.url}}" target="_blank">{{post.title|escape|safe}} <i class="icon-share-alt"></i></a></h2>
-        <h3 class="inner-site">
-            {# TODO: Change translation to a single call using blocktrans? #}
-            {% trans "from" %} <a href="{{post.site.url}}" target="_blank">{{post.site.title}}</a>
-            {% if post.author %}
-                {% trans "by" %} {{post.author}}
-            {% endif %}
-        </h3>
-        {{post.content|escape|safe}}
-    </div>
-</article>
+    {% get_if_starred as is_starred %}
+    <article class="post well" id="post-{{post.id}}" data-post_id="{{post.id}}" data-site_id="{{post.site.id}}">
+        <header>
+            <h1>
+                <a class="star-post pull-left"><i class="icon-star{% if not is_starred %}-empty{% endif%}"></i></a>
+                <span class="post-site span2">{{post.site.title}}</span>
+                <span class="span6">{{post.title|escape|safe}}</span>
+                <span class="post-date span2 pull-right">{{post.captured_at_display}}</span>
+            </h1>
+        </header>
+        <div class="post-content">
+            <h2 class="inner-title"><a href="{{post.url}}" target="_blank">{{post.title|escape|safe}} <i class="icon-share-alt"></i></a></h2>
+            <h3 class="inner-site">
+                {# TODO: Change translation to a single call using blocktrans? #}
+                {% trans "from" %} <a href="{{post.site.url}}" target="_blank">{{post.site.title}}</a>
+                {% if post.author %}
+                    {% trans "by" %} {{post.author}}
+                {% endif %}
+            </h3>
+            {{post.content|escape|safe}}
+        </div>
+        <footer>
+            <a href="" class="star-post"><i class="icon-star{% if not is_starred %}-empty{% endif%}"></i></a>
+        </footer>
+    </article>
 {% endfor %}

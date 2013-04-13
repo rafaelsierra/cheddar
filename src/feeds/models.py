@@ -174,6 +174,10 @@ class Post(BaseModel):
         from accounts.models import UserPost
         return UserPost.objects.get_or_create(user=user, post=self)[0]
     
+    def get_userpost(self, user):
+        '''Returns UserPost instance of this post for user'''
+        return self._get_userpost(user)
+    
     def mark_field(self, user, field, value):
         '''Mark this post's field as `value`'''
         userpost = self._get_userpost(user)
