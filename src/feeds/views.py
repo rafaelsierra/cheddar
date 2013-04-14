@@ -125,16 +125,20 @@ class MarkPostAsRead(View, LoginRequiredMixin, SingleObjectMixin):
         return HttpResponse(json.dumps(response), content_type='application/json')
 
 
+
 class MarkAllAsRead(View, LoginRequiredMixin):
     '''Dude, this can take forever...'''
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
-        return super(StarPost, self).dispatch(*args, **kwargs)
+        return super(MarkAllAsRead, self).dispatch(*args, **kwargs)
     
-    def post(self):
-        for post in UserSite.posts.unread(self.request.user):
-            post.mark_as_read(self.request.user)
-    
+    def post(self, request, **kwargs):
+        for post in UserSite.posts.unread(request.user):
+            post.mark_as_read(request.user)
+            
+        return HttpResponse(json.dumps({'success':True}), content_type='application/json')
+
+
 
 class StarPost(View, LoginRequiredMixin, SingleObjectMixin):
     '''Star the post of user'''
@@ -156,7 +160,7 @@ class StarPost(View, LoginRequiredMixin, SingleObjectMixin):
         response = {'id': post.id, 'is_starred': userpost.is_starred}
         return HttpResponse(json.dumps(response), content_type='application/json')
     
-   
+
     
 DEFAULT_FAVICON = '''iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMA
 QObYZgAAAApJREFUCB1jYAAAAAIAAc/INeUAAAAASUVORK5CYII=

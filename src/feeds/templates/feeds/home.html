@@ -3,6 +3,7 @@
 
 {% block extrahead %}
     <link rel="stylesheet" href="{{STATIC_URL}}feeds/css/styles.css">
+    <link rel="stylesheet" href="{{STATIC_URL}}feeds/css/animations.css">
 {% endblock %}
 
 {% block navbar-items %}
@@ -12,12 +13,15 @@
 {% block container %}
     <div class="row-fluid">
         <!-- Feeds menu -->
-        <div id="left-bar" class="span2 hidden-phone" data-spy="affix">
+        <div id="left-bar" class="span2 hidden-tablet" data-spy="affix">
             <div class="btn-toolbar">
                 <div class="btn-group">
-                    <button class="btn" title="{% trans "Mark all as read" %}"><i class="icon-eye-open"></i></button>
-                    <button class="btn" title="{% trans "Refresh" %}"><i class="icon-refresh"></i></button>
+                    <button class="btn" data-toggle="modal" href="#markAllAsReadModal" title="{% trans "Mark all as read" %}"><i class="icon-eye-open"></i></button>
+                    <button class="btn" title="{% trans "Refresh" %}" id="refresh-button"><i class="icon-refresh"></i></button>
                 </div>
+            </div>
+            <div id="social-feed">
+                
             </div>
             <div id="sites-container">
                 <ul class="nav nav-list">
@@ -27,6 +31,25 @@
         </div>
         <!-- Feed content -->
         <div class="span9 offset2" id="postlist"></div>
+    </div>
+    <div class="modal hide fade" id="markAllAsReadModal">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>{% trans "Are you sure?" %}</h3>
+        </div>
+        <div class="modal-body">
+            {% blocktrans %}
+                <p>This cannot be undone and you must wait for the response.</p>
+                <p>If you have some thousands of unread posts, this may take forever :)</p>
+                <p>If this takes more than 30 seconds, you may need to start again.</p>
+                <p class="hide alert alert-success">Success! All your posts were marked as read.</p>
+            {% endblocktrans %}
+        </div> 
+        <div class="modal-footer">
+            <i class="icon-cog hide pull-left spin"></i>
+            <button class="btn" data-dismiss="modal">{% trans "Cancel" %}</button>
+            <button class="btn btn-primary" id="doMarkAllAsRead">{% trans "Just do it" %}</button>
+        </div>
     </div>
 {% endblock %}
 {% block extrascript %}

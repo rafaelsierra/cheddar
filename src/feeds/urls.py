@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import patterns, include, url
 from feeds.views import HomeView, CheddarJSView, UserSiteList, UserPostList,\
-    MarkPostAsRead, ImportSubscriptionsFormView, proxy_favicon, StarPost
+    MarkPostAsRead, ImportSubscriptionsFormView, proxy_favicon, StarPost,\
+    MarkAllAsRead
 from django.views.generic.base import TemplateView
 
 urlpatterns = patterns('',
@@ -13,6 +14,7 @@ urlpatterns = patterns('',
     url(r'^my/posts/read/$', UserPostList.as_view(), name='post-list-read'),
     url(r'^my/posts/unread/$', UserPostList.as_view(), name='post-list-unread'),
     url(r'^my/posts/mark-as-read/$', MarkPostAsRead.as_view(), name='post-mark-as-read'),
+    url(r'^my/posts/mark-all-as-read/$', MarkAllAsRead.as_view(), name='post-mark-all-as-read'),
     url(r'^my/posts/(?P<pk>.+)/star/$', StarPost.as_view(), name='post-star-it'),
     url(r'^cheddar.js', CheddarJSView.as_view(), name='cheddarjs'),
     

@@ -11,6 +11,7 @@
         'post_list_read': "{% url 'feeds:post-list-read' %}",
         'post_list_unread': "{% url 'feeds:post-list-unread' %}",
         'mark_post_as_read': "{% url 'feeds:post-mark-as-read' %}",
+        'mark_all_posts_as_read': "{% url 'feeds:post-mark-all-as-read' %}",
         'star_post': function(postId){return "{% url 'feeds:post-star-it' pk='POSTID' %}".replace('POSTID', postId);}
     };
     
@@ -30,7 +31,21 @@
         var height = window.innerHeight - $("#top-bar").height();
         $("#postlist, #left-bar").height(height);
     }
-    
+
+    function mark_all_as_read(){
+        $("#markAllAsReadModal .spin").show();
+        $("#markAllAsReadModal button").hide();
+        $.ajax({
+            type:'POST',
+            url: urls.mark_all_posts_as_read,
+            success: function(response){
+                $("#markAllAsReadModal .spin").fadeOut();
+                $("#markAllAsReadModal button").fadeIn();
+                $("#markAllAsReadModal p:not(.alert)").hide();
+                $("#markAllAsReadModal p.alert").show();
+            }
+        })
+    }    
 
     function read_post(article){
         // TODO: Collapsable posts
@@ -145,6 +160,10 @@
                 $(this).toggleClass('icon-folder-open').toggleClass('icon-folder-close')
                 $(this).parent().parent().find('ul').slideToggle();
             });
+            
+            $("#refresh-button").click(function(){$.cheddar("refresh");})
+            
+            $("#doMarkAllAsRead").click(function(){mark_all_as_read();})
             
             // Binds hotkeys
             $(document).bind('keypress', 'j', move_cursor_to_next);
