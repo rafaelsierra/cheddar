@@ -17,6 +17,7 @@ import celery
 import datetime
 import hashlib
 import logging
+from django.core.exceptions import ValidationError
 
 
 logger = logging.getLogger('feeds.tasks')
@@ -84,8 +85,12 @@ class Site(BaseModel):
     
     def save(self, *args, **kwargs):
         '''Force model validation'''
-        self.full_clean()
-        super(Site, self).save(*args, **kwargs)
+        try:
+            self.full_clean()
+        except ValidationError, e:
+            logger.exception('Validation error')
+        else:
+            super(Site, self).save(*args, **kwargs)
         
     
     def getfeed(self):

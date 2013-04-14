@@ -52,13 +52,6 @@ def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
     # Avoids running two instances at the time
-    cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
-    if cache.get(cachekey):
-        logger.warn('Worker for site {} still running'.format(site.id))
-        return
-    
-    cache.add(cachekey, '1', 60) # Will not run again in 60 seconds        
-    
     from feeds.models import Post
     # Update task_id for this site
     site.task_id = update_site_feed.request.id
@@ -149,6 +142,8 @@ def update_site_feed(site):
     next_update = site.set_next_update(save=False)
     logger.info("Site's {} next update at {}".format(site.id, next_update))
     site.last_update = timezone.now()
+    cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
+    cache.delete(cachekey) # Release this site to run again
     site.save()    
     
     
@@ -168,8 +163,16 @@ def check_sites_for_update():
     logger.info(u"There are {} sites that needs update".format(sites.count()))
     
     for site in sites:
+        # Checks if this site was put to run recently
+        cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
+        
         if not site.task or site.task.status in (u'SUCCESS', u'FAILURE', u'REVOKED'):
             logger.warn('Starting task for site {}'.format(site.id))
+            if cache.get(cachekey):
+                logger.warn('Worker for site {} still running'.format(site.id))
+                continue
+            cache.add(cachekey, '1', 600) # Will not run again in 10 minutes
+
             site.update_feed()
         else:
             logger.warn('Tried to start another task for site {} but status is {}'.format(site.id, site.task.status))
