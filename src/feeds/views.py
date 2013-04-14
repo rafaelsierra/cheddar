@@ -162,10 +162,8 @@ class StarPost(View, LoginRequiredMixin, SingleObjectMixin):
     
 
     
-DEFAULT_FAVICON = '''iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAQMAAAAl21bKAAAAA1BMVEUAAACnej3aAAAAAXRSTlMA
-QObYZgAAAApJREFUCB1jYAAAAAIAAc/INeUAAAAASUVORK5CYII=
-'''
-@cache_page(3600*24*15)    
+DEFAULT_FAVICON = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAABtklE\nQVQ4y43TTUvUURQG8N/1ZUAKy2qjEEgUFC2KNpUbtyFueiEpGRsp6AO06FPkvhepxqaQioKJthGB\n0SZqESiFCJWrUINK+s/YbXHHGcmpvHA5z+Ge8/Cc594bYoyUQlEwhJyNrUw0aTiOhHhHUZCXIaCl\ntsN/KCKCiRBLfsrkFCLVbyy+Yf4p76+yvEDrP0myEEuiDIW4vuDTY16Oki39VVEigAo2dbGjj95h\nes80ql6cYu5hUzUNglUPVovaO+grsfN4yl9f4t3YOpKWenMhcvozR6/TuZvKMs9O8OpCqjx0hd6T\nxGYKmnkwe5upQsJ7znP4RsL3u6gs/aEgh2KgvJfpsXSy6xyDbxOeGefjo4SP3GSlmQcR1Vrc0s3g\nNO2dzN5iajR5MvQjdT3YTrawRkFEzzHyFUYqbD3Ak301JYWGJ3P3aiNdrHuRCKroLxNa0+4v83W+\nMc7+yynOlVLsHuDXWoKmLwQfriXcM5Dm/jKV8m0H1xBEmTY8HySuEKsJt2FhJlV19CTJ3xdT3rY5\n5bWnXBTl66OQmkP936nf1Pp8IsQYuRuKoiFhg985ygSTzsaR3435oAsmcnGfAAAAAElFTkSuQmCC\n'
+@cache_page(3600*24*15)
 def proxy_favicon(request, pk):
     '''Downloads and cache site's favicon'''
     # TODO: Better improve security here...
@@ -174,7 +172,7 @@ def proxy_favicon(request, pk):
         return HttpResponse(base64.decodestring(DEFAULT_FAVICON), content_type="image/png")
 
     try:
-        favicon = urllib2.urlopen('{}/favicon.ico'.format(site.url).replace('//', '/'))
+        favicon = urllib2.urlopen('{}/favicon.ico'.format(site.url).replace('//favicon.ico', '/favicon.ico'))
     except Exception, e:
         logger.exception('Failed to download site\'s favicon')
         return HttpResponse(base64.decodestring(DEFAULT_FAVICON), content_type="image/png")
