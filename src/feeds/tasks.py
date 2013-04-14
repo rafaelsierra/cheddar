@@ -29,7 +29,9 @@ def make_request(request):
         logger.error('Failed trying to download {}'.format(request.get_full_url()))
         return -1, None, u''
     
-    return response.getcode(), response.info(), response.read()
+    tup = response.getcode(), response.info(), response.read(settings.CRAWLER_MAX_FEED_SIZE)
+    response.close()
+    return tup
     
     
 @celery.task()
