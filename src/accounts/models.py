@@ -8,18 +8,30 @@ from django.db.models import Q
 # TODO: Make User.email unique
 
 class UserSitePostsManager(BaseModelManager):
-    def user_posts(self, user, is_read):
+    def user_posts(self, user, is_read=None):
         '''Avoid using user_posts directly, use unread or read instead'''
+        if is_read is None: # This "None" is used in its true meaning
+            query = Q()
+        else:
+            query = Q(userpost__user=user, userpost__is_read=is_read)|Q(userpost__user__isnull=True)
+             
         return Post.objects.filter(
-            Q(userpost__user=user, userpost__is_read=is_read)|Q(userpost__user__isnull=True),
+            query, 
             site__usersite__user=user,
         )
-        
+    
+    
+    def starred(self, user):
+        return self.user_posts(user, None).filter(userpost__is_starred=True)
+    
+    
     def unread(self, user):
         return self.user_posts(user, False)
     
+    
     def read(self, user):
         return self.user_posts(user, True).filter(userpost__is_read=True)
+         
             
 
 class Folder(BaseModel):

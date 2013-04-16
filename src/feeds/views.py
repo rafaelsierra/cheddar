@@ -95,10 +95,15 @@ class UserPostList(ListView, LoginRequiredMixin):
     
     def get_queryset(self):
         is_read = self.kwargs.get('is_read', False)
-        if is_read:
-            queryset = UserSite.posts.read(self.request.user)
+        is_starred = 'is_starred' in self.kwargs
+
+        if is_starred:
+            queryset = UserSite.posts.starred(self.request.user)
         else:
-            queryset = UserSite.posts.unread(self.request.user)
+            if is_read:
+                queryset = UserSite.posts.read(self.request.user)
+            else:
+                queryset = UserSite.posts.unread(self.request.user)
 
         # You can't filter both at once        
         if self.get_site():
@@ -177,4 +182,7 @@ def proxy_favicon(request, pk):
         logger.exception('Failed to download site\'s favicon')
         return HttpResponse(base64.decodestring(DEFAULT_FAVICON), content_type="image/png")
     else:
-        return HttpResponse(favicon.read(), content_type=favicon.headers.get('Content-Type', 'image/x-icon'))
+        if favicon.headers.get('Content-Type', '').startswith('text'):
+            return HttpResponse(base64.decodestring(DEFAULT_FAVICON), content_type="image/png")
+        else:
+            return HttpResponse(favicon.read(), content_type=favicon.headers.get('Content-Type', 'image/x-icon'))

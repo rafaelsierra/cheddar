@@ -10,16 +10,20 @@
         'mysites': "{% url 'feeds:my-sites' %}",
         'post_list_read': "{% url 'feeds:post-list-read' %}",
         'post_list_unread': "{% url 'feeds:post-list-unread' %}",
+        'post_list_starred': "{% url 'feeds:post-list-starred' %}",
         'mark_post_as_read': "{% url 'feeds:post-mark-as-read' %}",
         'mark_all_posts_as_read': "{% url 'feeds:post-mark-all-as-read' %}",
         'star_post': function(postId){return "{% url 'feeds:post-star-it' pk='POSTID' %}".replace('POSTID', postId);}
     };
     
     var post_list_state = {
-        is_read: false,
-        page: 1,
-        site: null,
-        folder: null,
+        reset: function(){
+            this.is_read = false;
+            this.is_starred = false;
+            this.page = 1;
+            this.site = null;
+            this.folder = null;
+        }
     };
     
     var sitelist_ovescroll_config = {direction:'vertical', hoverThumbs: true}
@@ -121,6 +125,7 @@
     var methods = {
         init: function(options){
             // One Ring to bring them all and in the darkness bind them
+            post_list_state.reset();
 
             // Reading posts event
             $("#postlist").on('click', 'article.post header', function(){
@@ -135,6 +140,13 @@
                 }
                 star_post(tag)
             });
+            
+            $("#starred-button").on('click', function(){
+                post_list_state.reset();
+                post_list_state.is_starred = true;   
+                clear_posts();
+                $.cheddar('loadPosts');   
+            })
             
             $("#sites-container").on('click', '.site-button', function(){
                 // Loads posts only from this site
@@ -223,15 +235,22 @@
         
         loadPosts: function(){
             var data = {};
+            var url = post_list_state.is_read?urls.post_list_read:urls.post_list_unread;
+            
             data['page'] = post_list_state.page;
+            
             if(post_list_state.site){
                 data['site'] = post_list_state.site;
             }else if(post_list_state.folder){
                 data['folder'] = post_list_state.folder; 
             }
             
+            if(post_list_state.is_starred){
+                url = urls.post_list_starred;
+            }
+
             $.ajax({
-                url: post_list_state.is_read?urls.post_list_read:urls.post_list_unread,
+                'url': url,
                 'data': data, // That's why I hate this with javascript
                 success: function(response){
                     $("#postlist").append(response);
