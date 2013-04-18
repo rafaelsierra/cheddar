@@ -11,7 +11,7 @@ class UserSitePostsManager(BaseModelManager):
     def user_posts(self, user, is_read=None):
         '''Avoid using user_posts directly, use unread or read instead'''
         if is_read is None: # This "None" is used in its true meaning
-            query = Q()
+            query = Q(userpost__user=user)
         else:
             query = Q(userpost__user=user, userpost__is_read=is_read)|Q(userpost__user__isnull=True)
              
