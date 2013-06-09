@@ -4,6 +4,8 @@ import celery
 import urllib2
 from django.conf import settings
 from feeds.tasks import make_request, parse_feed
+import socket
+import logging
     
 
 def build_request(url):
@@ -21,3 +23,20 @@ def feedopen(url):
     #chain = make_request.s(request)|parse_feed.s()
     feed = parse_feed(make_request(request))
     return feed
+
+
+def get_final_url(url):
+    '''Loops over url until it doesn't change (e.g. feedburner or shortened)'''
+    logging.debug(u'Checking final URL for {}'.format(url))
+    try:
+        post = urllib2.urlopen(build_request(url), timeout=5)
+    except (urllib2.URLError, urllib2.HTTPError, socket.error, socket.timeout), e:
+        logging.exception(u'Failed trying to download {}'.format(url))
+        return url
+    
+    if url != post.geturl():
+        logging.info(u'Final URL for {} diverges from {}'.format(url, post.geturl()))
+    else:
+        logging.debug(u'Post URL {} checked OK'.format(url))
+        
+    return post.geturl()

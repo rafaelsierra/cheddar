@@ -14,6 +14,7 @@ import socket
 import time
 import urllib2
 
+
 logger = get_task_logger(__name__)
 
 SITE_WORKER_CACHE_KEY = u'site-worker-{id}'
@@ -51,8 +52,10 @@ def parse_feed(rawdata):
 def update_site_feed(site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
-    # Avoids running two instances at the time
     from feeds.models import Post
+    from feeds.utils import get_final_url
+    
+    # Avoids running two instances at the time
     # Update task_id for this site
     site.task_id = update_site_feed.request.id
     site.save()
@@ -85,7 +88,7 @@ def update_site_feed(site):
             # Without link we can't save this post
             if not 'link' in entry:
                 continue
-            url = entry['link']
+            url = get_final_url(entry['link'])
             title = entry.get('title', '')
             
             # Try to get content
