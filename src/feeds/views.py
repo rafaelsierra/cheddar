@@ -79,7 +79,6 @@ class UserPostList(ListView, LoginRequiredMixin):
     template_name = 'feeds/ajax/post-list.html'
     context_object_name = 'posts'
     model = Post
-    paginate_by = 42
     
     def get_site(self):
         '''Returns site instance if set or None'''
@@ -110,6 +109,12 @@ class UserPostList(ListView, LoginRequiredMixin):
             queryset = queryset.filter(site=self.get_site())
         elif self.get_folder():
             queryset = queryset.filter(site__usersite__folder=self.get_folder())
+
+        # Fake pagination (since reading posts breaks default pagination)
+        if 'since' in self.request.REQUEST:
+            queryset = queryset.filter(created_at__gt=self.request.REQUEST.get('since'))
+            
+        queryset = queryset[:42]
             
         return queryset
     

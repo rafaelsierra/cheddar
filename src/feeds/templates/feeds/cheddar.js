@@ -20,7 +20,7 @@
         reset: function(){
             this.is_read = false;
             this.is_starred = false;
-            this.page = 1;
+            this.since = null;
             this.site = null;
             this.folder = null;
         }
@@ -71,7 +71,7 @@
         
         var unread_posts = $("#postlist article:not(.post-read)");
         if(unread_posts.length == 0){
-            post_list_state.page++;
+            post_list_state.since = $("#postlist article:last-child").data("created_at");
             $.cheddar('loadPosts');
         }
         
@@ -161,7 +161,7 @@
                 // Loads posts only from this site
                 clear_posts();
                 post_list_state.folder = null;
-                post_list_state.page = 1;
+                post_list_state.since = null;
                 post_list_state.site = $(this).data('site');
                 $.cheddar('loadPosts');
             })
@@ -171,7 +171,7 @@
                 // Loads posts only from this folder
                 clear_posts();
                 post_list_state.folder = $(this).data('folder');
-                post_list_state.page = 1;
+                post_list_state.since = null;
                 post_list_state.site = null;
                 $.cheddar('loadPosts');
             })
@@ -246,7 +246,9 @@
             var data = {};
             var url = post_list_state.is_read?urls.post_list_read:urls.post_list_unread;
             
-            data['page'] = post_list_state.page;
+            if(data['since']){
+                data['since'] = post_list_state.since;
+            }
             
             if(post_list_state.site){
                 data['site'] = post_list_state.site;
@@ -260,7 +262,7 @@
 
             $.ajax({
                 'url': url,
-                'data': data, // That's why I hate this with javascript
+                'data': data, // data: data makes total sense ¬¬
                 success: function(response){
                     $("#postlist").append(response);
                     // Change all <a> to target=_blank
