@@ -55,7 +55,9 @@ class UserPost(BaseModel):
     post = models.ForeignKey(Post, related_name='userpost')
     is_read = models.BooleanField(default=False, db_index=True)
     is_starred = models.BooleanField(default=False, db_index=True)
+    is_shared = models.BooleanField(default=False, db_index=True)
     
     class Meta:
         unique_together = (('user', 'post'),)
+    
     

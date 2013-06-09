@@ -18,10 +18,13 @@
                         <ul class="nav">
                             {% block navbar-items %}{% endblock %}
                         </ul>
-                        <div class="btn-toolbar">
-                            {% block navbar-buttons %}{% endblock %}
-                        </div>
+                        {% block navbar-buttons-container %}
+                            <div class="btn-toolbar">
+                                {% block navbar-buttons %}{% endblock %}
+                            </div>
+                        {% endblock %}
                         <ul class="nav pull-right">
+                            
                             {% if user.is_anonymous %}
                                 <li><a href="{% url "accounts:register"%}">{% trans "Signup" %}</a></li>
                             {% endif %}
@@ -39,6 +42,7 @@
                                 </li>
                             {% endif %}
                         </ul>
+                        <div class="loading nav pull-right spin" style="display:none;"></div>
                     </div>
                 </nav>
             </div>

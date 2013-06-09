@@ -124,6 +124,15 @@
         
     var methods = {
         init: function(options){
+            // Configure "Loading"
+            var ajaxStackCount = 0;
+            $(document).ajaxStart(function(){
+                $(".loading").show();
+            });
+            $(document).ajaxStop(function(){
+                $(".loading").hide();
+            });
+            
             // One Ring to bring them all and in the darkness bind them
             post_list_state.reset();
 

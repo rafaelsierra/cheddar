@@ -133,3 +133,11 @@ article.post .post-content {
     cursor: pointer;
 }
 
+.loading{
+    background: url(../img/loading.png) no-repeat;
+    width: 32px;
+    height: 32px;   
+    margin-top: 3px;
+    position:relative;
+    top:3px;
+}
