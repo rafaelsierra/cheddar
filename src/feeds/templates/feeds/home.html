@@ -10,8 +10,6 @@
     <li class="divider-vertical"></li>
 {% endblock %}
 
-{% block navbar-buttons-container %}{% endblock %}
-
 {% block container %}
     <div class="row-fluid">
         <!-- Feeds menu -->
@@ -35,7 +33,9 @@
             </div>
         </div>
         <!-- Feed content -->
-        <div class="span9 offset2" id="postlist"></div>
+        <div class="span9" id="postlist">
+            {% include "feeds/includes/post-list.html" with posts=posts%}
+        </div>
     </div>
     <div class="modal hide fade" id="markAllAsReadModal">
         <div class="modal-header">
@@ -60,6 +60,5 @@
 {% block extrascript %}
     <script src="{{STATIC_URL}}feeds/js/jquery.hotkeys.js"></script>
     <script src="{{STATIC_URL}}feeds/js/jquery.overscroll.js"></script>
-    <script src="{% url 'feeds:cheddarjs' %}"></script>
     <script src="{{STATIC_URL}}feeds/js/everything.js"></script>
 {% endblock %}    

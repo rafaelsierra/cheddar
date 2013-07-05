@@ -24,18 +24,49 @@ from django.views.generic.detail import SingleObjectMixin
 
 logger = logging.getLogger('feeds.views')
 
-class HomeView(TemplateView, LoginRequiredMixin):
+class HomeView(ListView, LoginRequiredMixin):
+    model = Post
     template_name = 'feeds/home.html'
+    context_object_name = 'posts'
+    
+    def get_site(self):
+        '''Returns site instance if set or None'''
+        if 'site' in self.request.REQUEST:
+            return Site.objects.get(id=self.request.REQUEST['site'])
+        
+    
+    def get_folder(self):
+        '''Returns folder instance if set or None'''
+        if 'folder' in self.request.REQUEST:
+            return Folder.objects.get(id=self.request.REQUEST['folder'])    
 
-    
-class CheddarJSView(TemplateView):
-    template_name = 'feeds/cheddar.js'
-    
-    def dispatch(self, *args, **kwargs):
-        response = super(CheddarJSView, self).dispatch(*args, **kwargs)
-        response['Content-Type'] = 'text/javascript'
-        return response
-    
+
+    def get_queryset(self):
+        is_read = self.kwargs.get('is_read', False)
+        is_starred = 'is_starred' in self.kwargs
+
+        if is_starred:
+            queryset = UserSite.posts.starred(self.request.user)
+        else:
+            if is_read:
+                queryset = UserSite.posts.read(self.request.user)
+            else:
+                queryset = UserSite.posts.unread(self.request.user)
+
+        # You can't filter both at once        
+        if self.get_site():
+            queryset = queryset.filter(site=self.get_site())
+        elif self.get_folder():
+            queryset = queryset.filter(site__usersite__folder=self.get_folder())
+
+        # Fake pagination (since reading posts breaks default pagination)
+        if 'since' in self.request.REQUEST:
+            queryset = queryset.filter(captured_at__gt=self.request.REQUEST.get('since'))
+            
+        queryset = queryset[:42]
+            
+        return queryset
+        
 
 class UserSiteList(ListView, LoginRequiredMixin):
     template_name = 'feeds/ajax/site-list.html'
@@ -73,51 +104,6 @@ class ImportSubscriptionsFormView(FormView, LoginRequiredMixin):
         return super(ImportSubscriptionsFormView, self).form_valid(form)
                     
                     
-    
-    
-class UserPostList(ListView, LoginRequiredMixin):
-    template_name = 'feeds/ajax/post-list.html'
-    context_object_name = 'posts'
-    model = Post
-    
-    def get_site(self):
-        '''Returns site instance if set or None'''
-        if 'site' in self.request.REQUEST:
-            return Site.objects.get(id=self.request.REQUEST['site'])
-        
-    
-    def get_folder(self):
-        '''Returns folder instance if set or None'''
-        if 'folder' in self.request.REQUEST:
-            return Folder.objects.get(id=self.request.REQUEST['folder'])    
-    
-    
-    def get_queryset(self):
-        is_read = self.kwargs.get('is_read', False)
-        is_starred = 'is_starred' in self.kwargs
-
-        if is_starred:
-            queryset = UserSite.posts.starred(self.request.user)
-        else:
-            if is_read:
-                queryset = UserSite.posts.read(self.request.user)
-            else:
-                queryset = UserSite.posts.unread(self.request.user)
-
-        # You can't filter both at once        
-        if self.get_site():
-            queryset = queryset.filter(site=self.get_site())
-        elif self.get_folder():
-            queryset = queryset.filter(site__usersite__folder=self.get_folder())
-
-        # Fake pagination (since reading posts breaks default pagination)
-        if 'since' in self.request.REQUEST:
-            queryset = queryset.filter(created_at__gt=self.request.REQUEST.get('since'))
-            
-        queryset = queryset[:42]
-            
-        return queryset
-    
 
 class MarkPostAsRead(View, LoginRequiredMixin, SingleObjectMixin):
     @method_decorator(csrf_exempt)
