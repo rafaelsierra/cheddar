@@ -25,8 +25,13 @@ def feedopen(url):
     return feed
 
 
-def get_final_url(url):
+def get_final_url(url, times_left=settings.MAX_FINAL_URL_TRIES):
     '''Loops over url until it doesn't change (e.g. feedburner or shortened)'''
+    
+    # Avoids recursive exaustion
+    if times_left < 1:
+        return url
+    
     logging.debug(u'Checking final URL for {}'.format(url))
     try:
         post = urllib2.urlopen(build_request(url), timeout=5)
@@ -36,6 +41,8 @@ def get_final_url(url):
     
     if url != post.geturl():
         logging.info(u'Final URL for {} diverges from {}'.format(url, post.geturl()))
+        # Try again until find a final URL (or tire out)
+        return get_final_url(post.geturl(), times_left-1)
     else:
         logging.debug(u'Post URL {} checked OK'.format(url))
         
