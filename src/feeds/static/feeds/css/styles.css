@@ -136,3 +136,7 @@ article.post .post-content {
     position: relative;
     top: 3px;
 }
+
+a.next{
+    width: 100px;
+}

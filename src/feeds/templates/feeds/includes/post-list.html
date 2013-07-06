@@ -27,7 +27,7 @@
         </footer>
     </article>
     {% if forloop.last %}
-        <a href="?since={{post.captured_at|date:'c'}}&order={{order}}" class="btn btn-primary">{% trans "Next" %}</a>
+        <a href="?since={{post.captured_at|date:'c'}}&order={{order}}" class="btn btn-primary next">{% trans "Next" %}</a>
     {% endif %}
 {% empty %}
     <p>

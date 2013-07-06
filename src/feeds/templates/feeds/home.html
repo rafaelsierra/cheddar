@@ -13,7 +13,7 @@
 {% block container %}
     <div class="row-fluid">
         <!-- Feeds menu -->
-        <div id="left-bar" class="span2 hidden-tablet" data-spy="affix">
+        <div id="left-bar" class="span2 hidden-tablet">
             <div class="btn-toolbar">
                 <div class="btn-group">
                     <button class="btn" data-toggle="modal" href="#markAllAsReadModal" title="{% trans "Mark all as read" %}"><i class="icon-eye-open"></i></button>
@@ -29,6 +29,7 @@
             <div id="sites-container">
                 <ul class="nav nav-list">
                     <li class="nav-header" id="feed-list">{% trans "Sites" %}</li>
+                    {% include "feeds/includes/site-list.html" %}
                 </ul>
             </div>
         </div>
@@ -60,5 +61,18 @@
 {% block extrascript %}
     <script src="{{STATIC_URL}}feeds/js/jquery.hotkeys.js"></script>
     <script src="{{STATIC_URL}}feeds/js/jquery.overscroll.js"></script>
+    <script>
+        var urls = {
+            'STATIC_URL': '{{STATIC_URL|escapejs}}',
+            'MEDIA_URL': '{{MEDIA_URL|escapejs}}',
+            'mysites': "{% url 'feeds:my-sites' %}",
+            'post_list_read': "{% url 'feeds:post-list-read' %}",
+            'post_list_unread': "{% url 'feeds:post-list-unread' %}",
+            'post_list_starred': "{% url 'feeds:post-list-starred' %}",
+            'mark_post_as_read': "{% url 'feeds:post-mark-as-read' %}",
+            'mark_all_posts_as_read': "{% url 'feeds:post-mark-all-as-read' %}",
+            'star_post': function(postId){return "{% url 'feeds:post-star-it' pk='POSTID' %}".replace('POSTID', postId);}
+        };
+    </script>
     <script src="{{STATIC_URL}}feeds/js/everything.js"></script>
 {% endblock %}    

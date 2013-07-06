@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django import template
+from feeds.models import Site
 
 register = template.Library()
 
@@ -18,3 +19,10 @@ def get_if_starred(context, user=None, post=None):
         
     userpost = post.get_userpost(user)
     return userpost.is_starred
+
+
+@register.assignment_tag(takes_context=True)
+def get_site_list(context, user):
+    queryset = Site.objects.all()
+    queryset = queryset.filter(usersite__user=user)
+    return queryset

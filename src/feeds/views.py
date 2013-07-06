@@ -32,6 +32,7 @@ class HomeView(ListView, LoginRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super(HomeView, self).get_context_data(**kwargs)
         context['order'] = self.get_ordering()
+        context['current_site'] = self.get_site() 
         return context
     
     def get_site(self):
@@ -50,7 +51,7 @@ class HomeView(ListView, LoginRequiredMixin):
             return Folder.objects.get(id=self.kwargs['folder'])    
 
     def get_ordering(self):
-        sort = None
+        order = None
         if 'order' in self.request.REQUEST:
             order = self.request.REQUEST['order'].lower()
         if 'sort' in self.kwargs:
@@ -101,7 +102,8 @@ class HomeView(ListView, LoginRequiredMixin):
         
 
 class UserSiteList(ListView, LoginRequiredMixin):
-    template_name = 'feeds/ajax/site-list.html'
+    '''View to manage subscriptions'''
+    template_name = '?'
     model = Site
     
     def get_queryset(self):

@@ -1,10 +1,23 @@
+{% load i18n %}
 {% load accountstags %}
-{% for site in object_list %}
+{% load feedstags %}
+
+{% if current_site %}
+    <li><hr><a href="{% url "feeds:home" %}">{%trans "See all posts" %}</a><hr></li>
+{% endif %}
+
+{% get_site_list user=user as site_list%}
+{% for site in site_list %}
     {% get_unread_count_for_site as unread_count %}
     {% if unread_count > 0 %}
         {% get_site_folder as folder %}
         <li id="site-{{site.id}}" {% if folder %}data-folder="{{folder.name}}" data-folder_id="{{folder.id}}"{% endif %}>
-            <a class="site-button" data-site="{{site.id}}"><img src="{% url 'feeds:proxy-favicon' pk=site.id %}" width="16" height="16" class="img-round"> {{site.title}} <span class="badge badge-success unread-counter">{{ unread_count }}</span></a>
+            {% if current_site.id == site.id %}<strong>{% endif %}
+            <a class="site-button" data-site="{{site.id}}" href="{% url 'feeds:post-list-unread' site=site.id %}">
+                <img src="{% url 'feeds:proxy-favicon' pk=site.id %}" width="16" height="16" class="img-round"> {{site.title}} 
+                <span class="badge badge-success unread-counter">{{ unread_count }}</span>
+            </a>
+            {% if current_site.id == site.id %}</strong>{% endif %}
         </li>
     {% endif %}
 {% endfor %}

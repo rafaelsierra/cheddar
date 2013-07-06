@@ -10,6 +10,8 @@ urlpatterns = patterns('',
     url(r'^my/posts/unread/$', HomeView.as_view(), {'is_read':False}, name='post-list-unread'),
     url(r'^my/posts/starred/$', HomeView.as_view(), {'is_starred':True}, name='post-list-starred'),
     
+    url(r'^sites/(?P<site>\d+)/read/$', HomeView.as_view(), {'is_read':False}, name='post-list-unread'),
+    
     url(r'^proxy/site/(?P<pk>\d+)/favicon.ico$', proxy_favicon, name='proxy-favicon'),
     url(r'^my/sites/$', UserSiteList.as_view(), name='my-sites'),
     url(r'^my/sites/import/$', ImportSubscriptionsFormView.as_view(), name='import'),
