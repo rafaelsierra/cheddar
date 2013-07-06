@@ -1,13 +1,12 @@
 (function(window, document, $, urls){
 
     /**
-     * Moves to the next or first post, or highlights the next button and presses it
+     * Moves to the next or first post, or highlights the next button
      */
     function move_cursor_to_next(){
         // Checks if there is a post active
         var article = $("article.active");
         var next;
-        console.log(article)
         if(article.length > 0){
             next = article.next('article');
             if(next.length==0){
@@ -22,12 +21,28 @@
             if($("a.next.glow").length > 0){
                 $("a.next.glow").click();
             }else{
-                $("article").first().click();
+                $("#postlist article").first().click();
             }
         }
     }
     
-    function move_cursor_to_previous(){}
+    function move_cursor_to_previous(){
+        // TODO: Previous button
+        var article = $("article.active");
+        var prev;
+        if(article.length == 0){
+            if($("a.next.glow").length > 0){
+                prev = $("#postlist article").last();
+            }else{
+                return;
+            }
+        }else{
+            prev = article.prev('article');
+        }
+        prev.addClass("active");
+        prev.click();
+        $("a.next").removeClass("glow");
+    }
 
     /**
      * Mark the post as read and highlight it
