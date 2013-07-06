@@ -7,13 +7,16 @@
         // Checks if there is a post active
         var article = $("article.active");
         var next;
+        console.log(article)
         if(article.length > 0){
             next = article.next('article');
             if(next.length==0){
                 $("article.active").removeClass("active");
-                $("a.next").addClass("glow");   
+                $(document).scrollTop($("a.next").offset().top)
+                $("a.next").addClass("glow").focus();
             }else{
                 next.click();
+                $("a.next").removeClass("glow");
             }
         }else{
             if($("a.next.glow").length > 0){
