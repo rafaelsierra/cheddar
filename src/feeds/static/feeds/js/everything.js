@@ -48,38 +48,56 @@
      * Mark the post as read and highlight it
      */
     function read_post(){
-        $this = $(this);
+        var article = $this = $(this);
         $("article.active").removeClass('active');
         $this.addClass('active');
         
         $(document).scrollTop($this.offset().top-10);
         
-        return;
-        $("#postlist .active").removeClass("active");
-        article.addClass("active");
-        var post_content = article.find('.post-content');
         var site = $("#site-"+article.data('site_id'));
         var counter = site.find('.unread-counter');
-
+        var post_id = article.data("post_id");
+        
         if(!article.hasClass('post-read')){
             counter.text(counter.text()-1);
-            $.cheddar('markAsRead', article.data("post_id"));
+            $.post(urls.mark_post_as_read, {id:post_id} ,function(response){
+                $("#post-"+post_id).addClass('post-read');
+            }, 'json');
         }
-        
-        window.location.hash = 'post-'+article.data('post_id');
-        window.scrollBy(0, -55);
-        
-        var unread_posts = $("#postlist article:not(.post-read)");
-        if(unread_posts.length == 0){
-            post_list_state.since = $("#postlist article:last-child").data("created_at");
-            $.cheddar('loadPosts');
-        }
+    }
+    
+    function star_post(article){
+        var postId = article.data("post_id");
+        $.ajax({
+            url:urls.star_post(postId),
+            type:'POST',
+            success: function(response){
+                article.find('.star-post i').toggleClass('icon-star').toggleClass('icon-star-empty');
+            },
+            dataType:'json'
+        });
     }
 
     $(document).ready(function() {
         $("article.post").click(read_post);
         $(document).bind('keypress', 'j', move_cursor_to_next);
         $(document).bind('keypress', 'k', move_cursor_to_previous);
+        $(document).bind('keypress', 'r', function(){window.location.reload()});
+        $(document).bind('keypress', 's', function(){
+            var article = $("#postlist article.active");
+            if(article.length>0){
+                star_post(article);
+            }
+        });
+        
+        $("#postlist").on('click', '.star-post', function(){
+            var tag = $(this).parent();
+            // Travese DOM tree backwards to find where is the article
+            while(tag.prop('tagName')!='ARTICLE'){
+                tag = tag.parent();
+            }
+            star_post(tag)
+        });
     }); 
     
     
