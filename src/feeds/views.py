@@ -29,21 +29,42 @@ class HomeView(ListView, LoginRequiredMixin):
     template_name = 'feeds/home.html'
     context_object_name = 'posts'
     
+    def get_context_data(self, **kwargs):
+        context = super(HomeView, self).get_context_data(**kwargs)
+        context['order'] = self.get_ordering()
+        return context
+    
     def get_site(self):
         '''Returns site instance if set or None'''
         if 'site' in self.request.REQUEST:
             return Site.objects.get(id=self.request.REQUEST['site'])
-        
+        elif 'site' in self.kwargs:
+            return Site.objects.get(id=self.kwargs['site'])
+    
     
     def get_folder(self):
         '''Returns folder instance if set or None'''
         if 'folder' in self.request.REQUEST:
-            return Folder.objects.get(id=self.request.REQUEST['folder'])    
+            return Folder.objects.get(id=self.request.REQUEST['folder'])
+        elif 'folder' in self.kwargs:
+            return Folder.objects.get(id=self.kwargs['folder'])    
 
+    def get_ordering(self):
+        sort = None
+        if 'order' in self.request.REQUEST:
+            order = self.request.REQUEST['order'].lower()
+        if 'sort' in self.kwargs:
+            order = self.kwargs['order'].lower()
+            
+        if not order in ('asc', 'desc'):
+            return 'asc'
+        return order
+            
 
     def get_queryset(self):
         is_read = self.kwargs.get('is_read', False)
         is_starred = 'is_starred' in self.kwargs
+        order = self.get_ordering()
 
         if is_starred:
             queryset = UserSite.posts.starred(self.request.user)
@@ -61,7 +82,18 @@ class HomeView(ListView, LoginRequiredMixin):
 
         # Fake pagination (since reading posts breaks default pagination)
         if 'since' in self.request.REQUEST:
-            queryset = queryset.filter(captured_at__gt=self.request.REQUEST.get('since'))
+            # Sorting also changes the filter
+            if order == 'asc':
+                query = {'captured_at__gt': self.request.REQUEST.get('since')}
+            else:
+                query = {'captured_at__lt': self.request.REQUEST.get('since')}
+            queryset = queryset.filter(**query)
+            
+        # Sort the result
+        if order == 'asc':
+            queryset = queryset.order_by('captured_at')
+        else:
+            queryset = queryset.order_by('-captured_at')
             
         queryset = queryset[:42]
             

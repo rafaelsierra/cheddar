@@ -1,6 +1,5 @@
 {% load i18n %}
 {% load feedstags %}
-
 {% for post in posts %}
     {% get_if_starred as is_starred %}
     <article class="post well" id="post-{{post.id}}" data-created_at="{{post.created_at}}" data-post_id="{{post.id}}" data-site_id="{{post.site.id}}">
@@ -28,7 +27,7 @@
         </footer>
     </article>
     {% if forloop.last %}
-        <a href="?since={{post.captured_at|date:'c'}}" class="btn btn-primary">{% trans "Next" %}</a>
+        <a href="?since={{post.captured_at|date:'c'}}&order={{order}}" class="btn btn-primary">{% trans "Next" %}</a>
     {% endif %}
 {% empty %}
     <p>
