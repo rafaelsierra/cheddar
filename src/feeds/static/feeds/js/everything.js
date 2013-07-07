@@ -1,4 +1,19 @@
 (function(window, document, $, urls){
+    
+    function mark_all_as_read(){
+        $("#markAllAsReadModal .spin").show();
+        $("#markAllAsReadModal button").hide();
+        $.ajax({
+            type:'POST',
+            url: urls.mark_all_posts_as_read,
+            success: function(response){
+                $("#markAllAsReadModal .spin").fadeOut();
+                $("#markAllAsReadModal button").fadeIn();
+                $("#markAllAsReadModal p:not(.alert)").hide();
+                $("#markAllAsReadModal p.alert").show();
+            }
+        })
+    }    
 
     /**
      * Moves to the next or first post, or highlights the next button
@@ -98,6 +113,7 @@
             }
             star_post(tag)
         });
+        $("#doMarkAllAsRead").click(function(){mark_all_as_read();})
     }); 
     
     

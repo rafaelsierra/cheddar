@@ -14,12 +14,6 @@
     <div class="row-fluid">
         <!-- Feeds menu -->
         <div id="left-bar" class="span2 hidden-tablet">
-            <div class="btn-toolbar">
-                <div class="btn-group">
-                    <button class="btn" data-toggle="modal" href="#markAllAsReadModal" title="{% trans "Mark all as read" %}"><i class="icon-eye-open"></i></button>
-                    <button class="btn" title="{% trans "Refresh" %}" id="refresh-button"><i class="icon-refresh"></i></button>
-                </div>
-            </div>
             <div id="social-feed">
                 <ul class="nav nav-list">
                     <li class="nav-header">{% trans "Social" %}</li>
@@ -35,6 +29,12 @@
         </div>
         <!-- Feed content -->
         <div class="span9" id="postlist">
+            <div class="btn-toolbar well actions">
+                <div class="btn-group">
+                    <button class="btn" data-toggle="modal" href="#markAllAsReadModal"><i class="icon-eye-open"></i> {% trans "Mark all as read" %}</button>
+                    <a class="btn" href="{% url 'feeds:my-sites' %}"><i class="icon-align-justify"></i> {% trans "Manage subscriptions"%}</a>
+                </div>
+            </div>
             {% include "feeds/includes/post-list.html" with posts=posts%}
         </div>
     </div>

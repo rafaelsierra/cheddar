@@ -103,8 +103,15 @@ class HomeView(ListView, LoginRequiredMixin):
 
 class UserSiteList(ListView, LoginRequiredMixin):
     '''View to manage subscriptions'''
-    template_name = '?'
+    template_name = 'feeds/my-sites.html'
     model = Site
+    context_object_name = 'sites' 
+    
+    def get_context_data(self, **kwargs):
+        context = super(UserSiteList, self).get_context_data(**kwargs)
+        context['folders'] = self.request.user.folders.all()
+        return context
+    
     
     def get_queryset(self):
         queryset = super(UserSiteList, self).get_queryset()

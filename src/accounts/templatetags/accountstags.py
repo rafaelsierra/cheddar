@@ -45,3 +45,9 @@ def get_site_folder(context, site=None, user=None):
         return None
     else:
         return usersite.folder    
+    
+
+@register.assignment_tag(takes_context=True)
+def get_usersite(context, user, site):
+    '''Returns the UserSite instance'''
+    return UserSite.objects.get(user=user, site=site)    

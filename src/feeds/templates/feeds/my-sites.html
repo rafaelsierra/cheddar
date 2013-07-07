@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load accountstags %}
+{% block extrahead %}
+    <link rel="stylesheet" href="{{STATIC_URL}}feeds/css/my-sites.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="{{STATIC_URL}}feeds/css/animations.css">
+{% endblock %}
+
+{% block container %}
+    <div class="row-fluid">
+        <h1>{% trans "Your subscriptions"%}</h1>
+        
+        <ul class="unstyled">
+            {% for site in sites %}
+                <li class="well edit-site" id="site-{{site.id}}" {% if folder %}data-folder="{{folder.name}}" data-folder_id="{{folder.id}}"{% endif %}>
+                    <a class="site-button" data-site="{{site.id}}" href="{% url 'feeds:post-list-unread' site=site.id %}">
+                        <img src="{% url 'feeds:proxy-favicon' pk=site.id %}" width="16" height="16" class="img-round"> {{site.title}} 
+                        <span class="badge badge-success unread-counter">{{ unread_count }}</span>
+                    </a>
+                    <span class="folder">
+                        <select>
+                            <option>--</option>
+                            {% get_usersite user=user site=site as usersite%}
+                            {% for folder in folders %}
+                                <option {% if folder.id == usersite.folder.id %}selected=selected{% endif %}>{{folder.name}}</option>
+                            {% endfor %}
+                        </select>
+                    </span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

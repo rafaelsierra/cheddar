@@ -35,9 +35,6 @@
     div.post-content {
         margin-top: 10px;
     }
-    #left-bar:hover {
-        overflow: auto;
-    }
 }
 
 @media screen and (max-width: 1199px) {
@@ -81,9 +78,6 @@
     div.post-content {
         margin-top: 10px;
     }
-    #left-bar:hover {
-        overflow: auto;
-    }
 }
 
 a {
@@ -125,6 +119,10 @@ div.paost-content {
 
 article.post .post-content {
     overflow: hidden;
+}
+
+div.actions{
+    padding: 2px;
 }
 
 .star-post {

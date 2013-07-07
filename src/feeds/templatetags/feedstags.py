@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import template
 from feeds.models import Site
+from accounts.models import UserSite
 
 register = template.Library()
 
@@ -26,3 +27,4 @@ def get_site_list(context, user):
     queryset = Site.objects.all()
     queryset = queryset.filter(usersite__user=user)
     return queryset
+
