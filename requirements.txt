@@ -1,5 +1,6 @@
 Django>=1.5
 django-celery>=3.0.11
+python-memcached
 
 listparser
 feedparser
