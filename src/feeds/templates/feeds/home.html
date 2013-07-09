@@ -36,9 +36,11 @@
                     </div>
                 {% endif %}
                 <div class="btn-group">
-                    
                     <button class="btn" data-toggle="modal" href="#markAllAsReadModal"><i class="icon-eye-open"></i> {% trans "Mark all as read" %}</button>
                     <a class="btn" href="{% url 'feeds:my-sites' %}"><i class="icon-align-justify"></i> {% trans "Manage subscriptions"%}</a>
+                </div>
+                <div class="btn-group pull-right">
+                    <span>Oi</span>
                 </div>
             </div>
             {% include "feeds/includes/post-list.html" with posts=posts%}
