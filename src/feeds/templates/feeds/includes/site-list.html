@@ -1,11 +1,6 @@
 {% load i18n %}
 {% load accountstags %}
 {% load feedstags %}
-
-{% if current_site %}
-    <li><hr><a href="{% url "feeds:home" %}">{%trans "See all posts" %}</a><hr></li>
-{% endif %}
-
 {% get_site_list user=user as site_list%}
 {% for site in site_list %}
     {% get_unread_count_for_site as unread_count %}

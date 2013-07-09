@@ -1,5 +1,27 @@
 (function(window, document, $, urls){
     
+    function update_folder(){
+        var folders = {}; // List of folders
+        var sites = $("#sites-container li");
+        
+        // Load folders
+        $.each(sites, function(i, site){   
+            site = $(site);         
+            if(!site.data('folder')){ return; }
+            
+            var id = site.data('folder_id');
+            folders[id] = site.data('folder');
+        });
+        
+        // Create folders into list
+        $.each(folders, function(id, folder){
+            var li = '<li id="folder-'+id+'" class="site-folder"><a href="javascript:void(0);" data-folder="'+id+'"><i class="icon-folder-close folder-button"></i> '+folder+'</a><ul class="nav nav-list"></ul></li>';
+            $(li).insertAfter("#feed-list");
+            $("#sites-container li[data-folder_id="+id+"]").detach().appendTo("#folder-"+id+' ul');
+            $("#folder-"+id+" ul").hide();
+        });
+    }
+    
     function mark_all_as_read(){
         $("#markAllAsReadModal .spin").show();
         $("#markAllAsReadModal button").hide();
@@ -94,6 +116,7 @@
     }
 
     $(document).ready(function() {
+        update_folder();
         $("article.post").click(read_post);
         $(document).bind('keypress', 'j', move_cursor_to_next);
         $(document).bind('keypress', 'k', move_cursor_to_previous);
@@ -112,6 +135,10 @@
                 tag = tag.parent();
             }
             star_post(tag)
+        });
+        $("#sites-container").on('click', '.site-folder i', function(){
+            $(this).toggleClass('icon-folder-open').toggleClass('icon-folder-close')
+            $(this).parent().parent().find('ul').slideToggle();
         });
         $("#doMarkAllAsRead").click(function(){mark_all_as_read();})
     }); 

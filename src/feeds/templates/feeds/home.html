@@ -30,7 +30,13 @@
         <!-- Feed content -->
         <div class="span9" id="postlist">
             <div class="btn-toolbar well actions">
+                {% if current_site %}
+                    <div class="btn-group">
+                        <a class="btn" href="{% url "feeds:home" %}"><i class="icon-arrow-left"></i> {%trans "Back to all posts" %}</a>
+                    </div>
+                {% endif %}
                 <div class="btn-group">
+                    
                     <button class="btn" data-toggle="modal" href="#markAllAsReadModal"><i class="icon-eye-open"></i> {% trans "Mark all as read" %}</button>
                     <a class="btn" href="{% url 'feeds:my-sites' %}"><i class="icon-align-justify"></i> {% trans "Manage subscriptions"%}</a>
                 </div>
