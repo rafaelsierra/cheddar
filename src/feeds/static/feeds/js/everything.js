@@ -1,5 +1,18 @@
 (function(window, document, $, urls){
     
+    function update_total_counter(){
+        var total = 0;
+        var n;
+        var unread_counter = $(".unread-counter");
+        for(var i=0;i<unread_counter.length;i++){
+            n = parseInt($(unread_counter[i]).text());
+            if(n){
+                total+=n;
+            }
+        }
+        $(".total-counter").text(total);
+    }
+    
     function update_folder(){
         var folders = {}; // List of folders
         var sites = $("#sites-container li");
@@ -97,6 +110,7 @@
         
         if(!article.hasClass('post-read')){
             counter.text(counter.text()-1);
+            $(".total-counter").text($(".total-counter").text()-1);
             $.post(urls.mark_post_as_read, {id:post_id} ,function(response){
                 $("#post-"+post_id).addClass('post-read');
             }, 'json');
@@ -117,6 +131,7 @@
 
     $(document).ready(function() {
         update_folder();
+        update_total_counter();
         $("article.post").click(read_post);
         $(document).bind('keypress', 'j', move_cursor_to_next);
         $(document).bind('keypress', 'k', move_cursor_to_previous);

@@ -10,7 +10,7 @@
             {% if current_site.id == site.id %}<strong>{% endif %}
             <a class="site-button" data-site="{{site.id}}" href="{% url 'feeds:post-list-unread' site=site.id %}">
                 <img src="{% url 'feeds:proxy-favicon' pk=site.id %}" width="16" height="16" class="img-round"> 
-                <span class="label label-success unread-counter">{{ unread_count }}</span>
+                <span class="label label-info unread-counter">{{ unread_count }}</span>
                 {{site.title}} 
                 
             </a>

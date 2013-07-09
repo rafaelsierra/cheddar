@@ -22,7 +22,7 @@
             </div>
             <div id="sites-container">
                 <ul class="nav nav-list">
-                    <li class="nav-header" id="feed-list">{% trans "Sites" %}</li>
+                    <li class="nav-header" id="feed-list">{% trans "Sites" %} <span class="label total-counter"></span></li>
                     {% include "feeds/includes/site-list.html" %}
                 </ul>
             </div>
@@ -38,9 +38,6 @@
                 <div class="btn-group">
                     <button class="btn" data-toggle="modal" href="#markAllAsReadModal"><i class="icon-eye-open"></i> {% trans "Mark all as read" %}</button>
                     <a class="btn" href="{% url 'feeds:my-sites' %}"><i class="icon-align-justify"></i> {% trans "Manage subscriptions"%}</a>
-                </div>
-                <div class="btn-group pull-right">
-                    <span>Oi</span>
                 </div>
             </div>
             {% include "feeds/includes/post-list.html" with posts=posts%}
