@@ -9,4 +9,4 @@ django-nose
 ipdb
 ipython
 
-git+https://github.com/rafaelsdm/django-metadata.git
+git+https://github.com/rafaelsierra/django-metadata.git
