@@ -21,6 +21,7 @@ import json
 import logging
 import urllib2
 from django.views.generic.detail import SingleObjectMixin
+from accounts.forms import AddFolderForm
 
 logger = logging.getLogger('feeds.views')
 
@@ -110,6 +111,7 @@ class UserSiteList(ListView, LoginRequiredMixin):
     def get_context_data(self, **kwargs):
         context = super(UserSiteList, self).get_context_data(**kwargs)
         context['folders'] = self.request.user.folders.all()
+        context['add_folder_form'] = AddFolderForm()
         return context
     
     

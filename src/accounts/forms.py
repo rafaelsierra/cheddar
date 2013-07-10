@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from accounts.models import Folder
 
 class RegisterForm(UserCreationForm):
     '''Extends the default user creation form to add email as a required field'''
@@ -17,3 +18,10 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email')
+        
+
+
+class AddFolderForm(forms.ModelForm):
+    class Meta:
+        model = Folder
+        fields = ('name',)

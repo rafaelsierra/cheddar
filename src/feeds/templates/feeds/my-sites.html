@@ -9,25 +9,44 @@
 {% block container %}
     <div class="row-fluid">
         <h1>{% trans "Your subscriptions"%}</h1>
-        
         <ul class="unstyled">
             {% for site in sites %}
+                {% get_usersite user=user site=site as usersite %}
                 {% get_unread_count_for_site as unread_count %}
-                <li class="well edit-site" id="site-{{site.id}}" {% if folder %}data-folder="{{folder.name}}" data-folder_id="{{folder.id}}"{% endif %}>
+                <li class="well edit-site" data-usersite_id="{{usersite.id}}" id="site-{{site.id}}" {% if folder %}data-folder="{{folder.name}}" data-folder_id="{{folder.id}}"{% endif %}>
                         <img src="{% url 'feeds:proxy-favicon' pk=site.id %}" width="16" height="16" class="img-round"> 
-                        <span class="label label-success unread-counter">{{ unread_count }}</span>
+                        <span class="label label-info unread-counter">{{ unread_count }}</span>
                         {{site.title}} 
                     <span class="folder">
                         <select>
-                            <option>--</option>
-                            {% get_usersite user=user site=site as usersite%}
+                            <option value="">--</option>
+                            
                             {% for folder in folders %}
-                                <option {% if folder.id == usersite.folder.id %}selected=selected{% endif %}>{{folder.name}}</option>
+                                <option {% if folder.id == usersite.folder.id %}selected=selected{% endif %} value="{{folder.id}}">{{folder.name}}</option>
                             {% endfor %}
                         </select>
                     </span>
                 </li>
             {% endfor %}
         </ul>
+        <div class="well">
+            <form class="form-inline" action="{% url 'accounts:add-folder' %}" method="post" id="add-folder">
+                {% csrf_token %}
+                <h2>{% trans "Add Folder" %}</h2>
+                {{add_folder_form}}
+                <button class="btn btn-primary">{% trans "Save" %}</button>
+            </form>
+        </div>        
     </div>
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+        var urls = {
+            'STATIC_URL': '{{STATIC_URL|escapejs}}',
+            'MEDIA_URL': '{{MEDIA_URL|escapejs}}',
+            'change_folder': "{% url 'accounts:change-folder' %}"
+        };
+    </script>
+    <script src="{{STATIC_URL}}accounts/js/my-sites.js"></script>
 {% endblock %}
