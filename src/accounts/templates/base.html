@@ -14,7 +14,7 @@
             <div class="navbar navbar-top" id="top-bar">
                 <nav role="navigation" class="navbar-inner ">
                     <div class="container-fluid">
-                        <a href="#" class="brand">Cheddar</a>
+                        <a href="{% url 'home' %}" class="brand">Cheddar</a>
                         <ul class="nav">
                             {% block navbar-items %}{% endblock %}
                         </ul>
@@ -28,7 +28,8 @@
                                 <li class="dropdown">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">{% trans "Welcome" %}, {{user.username}} <b class="caret"></b></a>
                                     <ul class="dropdown-menu" data-toggle="dropdown">
-                                        <li><a href="{% url 'feeds:import' %}">{% trans "Import subscriptions" %}</a></li>
+                                        <li><a href="{% url 'feeds:import' %}"><i class="icon-upload"></i> {% trans "Import subscriptions" %}</a></li>
+                                        <li><a href="{% url 'accounts:logout' %}"><i class="icon-user"></i> {% trans "Logout" %}</a></li>
                                     </ul>
                                 </li>
                             {% else %}

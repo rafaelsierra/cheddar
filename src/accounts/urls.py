@@ -5,6 +5,7 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from accounts.views import RegisterView, ChangeFolder, AddFolderView
 from django.views.generic.base import TemplateView
+from django.core.urlresolvers import reverse_lazy
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -18,4 +19,6 @@ urlpatterns = patterns('',
                        
     url(r'login/$', 'django.contrib.auth.views.login', 
         {'template_name': 'accounts/login.html'}, name="login"),
+    url(r'logout/$', 'django.contrib.auth.views.logout', 
+        {'next_page': reverse_lazy('accounts:login')}, name="logout")
 )

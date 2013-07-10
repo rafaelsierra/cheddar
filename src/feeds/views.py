@@ -25,7 +25,7 @@ from accounts.forms import AddFolderForm
 
 logger = logging.getLogger('feeds.views')
 
-class HomeView(ListView, LoginRequiredMixin):
+class HomeView(LoginRequiredMixin, ListView):
     model = Post
     template_name = 'feeds/home.html'
     context_object_name = 'posts'
@@ -102,7 +102,7 @@ class HomeView(ListView, LoginRequiredMixin):
         return queryset
         
 
-class UserSiteList(ListView, LoginRequiredMixin):
+class UserSiteList(LoginRequiredMixin, ListView):
     '''View to manage subscriptions'''
     template_name = 'feeds/my-sites.html'
     model = Site
@@ -121,7 +121,7 @@ class UserSiteList(ListView, LoginRequiredMixin):
         return queryset
         
     
-class ImportSubscriptionsFormView(FormView, LoginRequiredMixin):
+class ImportSubscriptionsFormView(LoginRequiredMixin, FormView):
     template_name = 'feeds/import.html'
     form_class = ImportSubscriptionForm
     success_url = reverse_lazy('feeds:import-success')
@@ -148,7 +148,7 @@ class ImportSubscriptionsFormView(FormView, LoginRequiredMixin):
                     
                     
 
-class MarkPostAsRead(View, LoginRequiredMixin, SingleObjectMixin):
+class MarkPostAsRead(LoginRequiredMixin, View, SingleObjectMixin):
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(MarkPostAsRead, self).dispatch(*args, **kwargs)
@@ -165,7 +165,7 @@ class MarkPostAsRead(View, LoginRequiredMixin, SingleObjectMixin):
 
 
 
-class MarkAllAsRead(View, LoginRequiredMixin):
+class MarkAllAsRead(LoginRequiredMixin, View):
     '''Dude, this can take forever...'''
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
@@ -179,7 +179,7 @@ class MarkAllAsRead(View, LoginRequiredMixin):
 
 
 
-class StarPost(View, LoginRequiredMixin, SingleObjectMixin):
+class StarPost(LoginRequiredMixin, View, SingleObjectMixin):
     '''Star the post of user'''
     model = Post
     @method_decorator(csrf_exempt)
