@@ -17,7 +17,7 @@
             <div id="social-feed">
                 <ul class="nav nav-list">
                     <li class="nav-header">{% trans "Social" %}</li>
-                    <li><a id="starred-button"><i class="icon-star"></i>{% trans "Starred Items"%}</a></li>
+                    <li><a id="starred-button" href="{% url 'feeds:post-list-starred'%}"><i class="icon-star"></i>{% trans "Starred Items"%}</a></li>
                 </ul>
             </div>
             <div id="sites-container">
