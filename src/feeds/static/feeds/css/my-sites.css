@@ -14,6 +14,18 @@ li.edit-site:hover{
     box-shadow: inset 0 -1px 1px rgba(0,0,0,0.1);
 }
 
+li.edit-site form{
+	display: inline-block;
+	margin: 0;
+	float:right;
+	margin-right: 10px;
+	display: none;
+}
+
+li.edit-site:hover form{
+	display: inline-block;
+}
+
 li span.folder{
     float:right;
 }

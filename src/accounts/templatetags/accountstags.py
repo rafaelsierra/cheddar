@@ -2,6 +2,7 @@
 from django import template
 from django.template.base import TemplateSyntaxError
 from accounts.models import UserSite
+from accounts.forms import UnsubscribeFeedForm
 
 register = template.Library()
 
@@ -51,3 +52,10 @@ def get_site_folder(context, site=None, user=None):
 def get_usersite(context, user, site):
     '''Returns the UserSite instance'''
     return UserSite.objects.get(user=user, site=site)    
+
+
+
+@register.assignment_tag(takes_context=True)
+def get_unsubscribe_form(context, usersite):
+    form = UnsubscribeFeedForm(instance=usersite)
+    return form

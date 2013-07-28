@@ -1,7 +1,7 @@
 # Create your views here.
 from django.views.generic.edit import FormView
 from django.core.urlresolvers import reverse_lazy
-from accounts.forms import RegisterForm, AddFolderForm
+from accounts.forms import RegisterForm, AddFolderForm, UnsubscribeFeedForm
 from django.conf import settings
 from django.views.generic.base import View
 from django.utils.decorators import method_decorator
@@ -61,4 +61,14 @@ class AddFolderView(JSONFormMixin, FormView):
     def form_valid(self, form):
         Folder.objects.get_or_create(name=form.cleaned_data['name'], user=self.request.user, defaults={'is_active':True})[0]
         return super(AddFolderView, self).form_valid(form)
+    
+    
+
+class UnsubscribeFeed(JSONFormMixin, FormView):
+    form_class = UnsubscribeFeedForm
+    def form_valid(self, form):
+        site = form.cleaned_data['site']
+        usersite = UserSite.objects.get(user=self.request.user, site=site)
+        usersite.delete()
+        return super(UnsubscribeFeed, self).form_valid(form)
         

@@ -3,6 +3,7 @@ from django.conf.urls import patterns, include, url
 from django.views.generic.base import TemplateView
 from feeds.views import HomeView, UserSiteList, MarkPostAsRead, \
     ImportSubscriptionsFormView, proxy_favicon, StarPost, MarkAllAsRead
+from accounts.views import UnsubscribeFeed
 
 urlpatterns = patterns('',
     url(r'^$', HomeView.as_view(), name='home'),
@@ -14,6 +15,7 @@ urlpatterns = patterns('',
     
     url(r'^proxy/site/(?P<pk>\d+)/favicon.ico$', proxy_favicon, name='proxy-favicon'),
     url(r'^my/sites/$', UserSiteList.as_view(), name='my-sites'),
+    url(r'^my/sites/unsubscribe/$', UnsubscribeFeed.as_view(), name='unsubscribe'),
     url(r'^my/sites/import/$', ImportSubscriptionsFormView.as_view(), name='import'),
     url(r'^my/sites/import/success/$', TemplateView.as_view(template_name='feeds/import-success.html'), name='import-success'),
     
