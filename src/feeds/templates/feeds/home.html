@@ -22,7 +22,7 @@
             </div>
             <div id="sites-container">
                 <ul class="nav nav-list">
-                    <li class="nav-header" id="feed-list">{% trans "Sites" %} <span class="label total-counter"></span></li>
+                    <li class="nav-header" id="feed-list"><a href="{% url "feeds:home"%}">{% trans "Sites" %} <span class="label total-counter"></span></a></li>
                     {% include "feeds/includes/site-list.html" %}
                 </ul>
             </div>
@@ -38,6 +38,19 @@
                 <div class="btn-group">
                     <button class="btn" data-toggle="modal" href="#markAllAsReadModal"><i class="icon-eye-open"></i> {% trans "Mark all as read" %}</button>
                     <a class="btn" href="{% url 'feeds:my-sites' %}"><i class="icon-align-justify"></i> {% trans "Manage subscriptions"%}</a>
+                </div>
+                <div class="btn-group">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> {% trans "Settings"%}</a>
+                    <ul class="dropdown-menu">
+                    	<li class="dropdown-submenu">
+                    		<a href="#">{% trans "Sort" %}</a>
+                    		<ul class="dropdown-menu">
+                    			<li><a href="?order=asc"><i class="icon-{% if request.session.ordering == 'asc' %}ok{%else%}arrow-up{% endif %}"></i> {% trans "Ascending"%}</a></li>
+                    			<li><a href="?order=desc"><i class="icon-{% if request.session.ordering == 'desc' %}ok{%else%}arrow-down{% endif %}"></i> {% trans "Descending"%}</a></li>
+                    		</ul>
+                    	</li>
+                    	
+                    </ul>
                 </div>
             </div>
             {% include "feeds/includes/post-list.html" with posts=posts%}

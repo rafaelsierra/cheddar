@@ -36,6 +36,7 @@ class HomeView(LoginRequiredMixin, ListView):
         context['current_site'] = self.get_site() 
         return context
     
+    
     def get_site(self):
         '''Returns site instance if set or None'''
         if 'site' in self.request.REQUEST:
@@ -51,15 +52,23 @@ class HomeView(LoginRequiredMixin, ListView):
         elif 'folder' in self.kwargs:
             return Folder.objects.get(id=self.kwargs['folder'])    
 
+
     def get_ordering(self):
+        '''Returns what order will be applied in the query'''
         order = None
+        # Checks if the order was sent in GET/POST or right from URL
         if 'order' in self.request.REQUEST:
             order = self.request.REQUEST['order'].lower()
         if 'sort' in self.kwargs:
             order = self.kwargs['order'].lower()
-            
+
         if not order in ('asc', 'desc'):
-            return 'asc'
+            # If no order was sent yet (or is wrong), checks if it is in the session
+            return self.request.session.get('ordering', 'asc')
+        else:
+            # If a order method is sent in the URL, change the user session ordering
+            self.request.session['ordering'] = order
+            
         return order
             
 
@@ -101,6 +110,7 @@ class HomeView(LoginRequiredMixin, ListView):
             
         return queryset
         
+        
 
 class UserSiteList(LoginRequiredMixin, ListView):
     '''View to manage subscriptions'''
@@ -119,6 +129,7 @@ class UserSiteList(LoginRequiredMixin, ListView):
         queryset = super(UserSiteList, self).get_queryset()
         queryset = queryset.filter(usersite__user=self.request.user)
         return queryset
+        
         
     
 class ImportSubscriptionsFormView(LoginRequiredMixin, FormView):
@@ -170,6 +181,7 @@ class MarkAllAsRead(LoginRequiredMixin, View):
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(MarkAllAsRead, self).dispatch(*args, **kwargs)
+    
     
     def post(self, request, **kwargs):
         for post in UserSite.posts.unread(request.user):
