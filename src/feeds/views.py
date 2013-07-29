@@ -21,7 +21,8 @@ import json
 import logging
 import urllib2
 from django.views.generic.detail import SingleObjectMixin
-from accounts.forms import AddFolderForm
+from accounts.forms import AddFolderForm, SubscribeFeedForm
+import datetime
 
 logger = logging.getLogger('feeds.views')
 
@@ -122,6 +123,9 @@ class UserSiteList(LoginRequiredMixin, ListView):
         context = super(UserSiteList, self).get_context_data(**kwargs)
         context['folders'] = self.request.user.folders.all()
         context['add_folder_form'] = AddFolderForm()
+        context['subscribe_form'] = SubscribeFeedForm() if not hasattr(self, 'subscribe_form') else self.subscribe_form
+        if hasattr(self, 'subscribed_success'):
+            context['subscribed_success'] = True
         return context
     
     
@@ -129,6 +133,25 @@ class UserSiteList(LoginRequiredMixin, ListView):
         queryset = super(UserSiteList, self).get_queryset()
         queryset = queryset.filter(usersite__user=self.request.user)
         return queryset
+    
+    
+    def post(self, request):
+        form = SubscribeFeedForm(request.POST)
+        if form.is_valid():
+            feed_url = form.cleaned_data['feed_url']
+            site, created = Site.objects.get_or_create(feed_url=feed_url, defaults={'last_update': datetime.datetime(1990, 1,1), 'next_update':datetime.datetime.utcnow()})
+            if created:
+                try:
+                    site.update_feed()
+                except:
+                    # Nothing to do here
+                    pass
+            usersite = UserSite.objects.get_or_create(site=site, user=request.user)[0]
+            self.subscribed_success = True
+        else:
+            self.subscribe_form = form
+        
+        return self.get(request)
         
         
     

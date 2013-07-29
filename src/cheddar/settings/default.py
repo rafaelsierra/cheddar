@@ -8,6 +8,7 @@ PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.
 CRAWLER_USER_AGENT = 'Cheddar Reader Crawler/1.0'
 CRAWLER_TIMEOUT = 30 # Avoid setting a high timeout, unless you can aford it
 CRAWLER_MAX_FEED_SIZE = 50*1024*1024 # Maximum size in bytes to read from a feed, this may lead to MemoryErrors when to much high 
+CRAWLER_MAX_FEED_SITE_SITE = 2*1024*1024 # Maximum site in bytes to read from a feed while adding feeds on the site
 
 MIN_UPDATE_INTERVAL_SECONDS = 600 # Updates at max 6 times per hour
 MIN_UPDATE_INTERVAL = timedelta(seconds=MIN_UPDATE_INTERVAL_SECONDS) 

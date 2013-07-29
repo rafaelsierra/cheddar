@@ -6,6 +6,7 @@ from django.conf import settings
 from feeds.tasks import make_request, parse_feed
 import socket
 import logging
+import sgmllib
     
 
 def build_request(url):
@@ -47,3 +48,20 @@ def get_final_url(url, times_left=settings.MAX_FINAL_URL_TRIES):
         logging.debug(u'Post URL {} checked OK'.format(url))
         
     return post.geturl()
+
+
+
+class FindLinkToFeedParser(sgmllib.SGMLParser):
+    '''Class to parse HTML content and get links to feeds'''
+    feed_url = None
+        
+    def start_link(self, attributes):
+        data = {'rel': None, 'type': None, 'href': None}
+        content_types = ['application/rss+xml', 'application/atom+xml', 'application/rdf+xml']
+        for att in attributes:
+            if att[0] in data:
+                data[att[0]] = att[1]
+        
+        if data['type'] in content_types:
+            self.feed_url = data['href']
+        

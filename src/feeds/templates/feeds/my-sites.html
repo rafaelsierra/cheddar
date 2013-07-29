@@ -10,7 +10,13 @@
     <div class="row-fluid">
         <h1>{% trans "Your subscriptions"%}</h1>
         <div class="well">
-            <form class="form-inline" action="{% url 'accounts:add-folder' %}" method="post" id="add-folder">
+            {% if subscribed_success %}
+                <div class="alert alert-success">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    {% blocktrans %}Successfully subscribed to feed{% endblocktrans %}
+                </div>
+            {% endif %}
+            <form class="form-inline" action="{% url 'feeds:subscribe' %}" method="post">
                 {% csrf_token %}
                 <h2>{% trans "Subscribe to a new feed" %}</h2>
                 {{subscribe_form}}
@@ -24,7 +30,7 @@
                 <li class="well edit-site" data-usersite_id="{{usersite.id}}" id="site-{{site.id}}" {% if folder %}data-folder="{{folder.name}}" data-folder_id="{{folder.id}}"{% endif %}>
 	                <!-- img src="{% url 'feeds:proxy-favicon' pk=site.id %}" width="16" height="16" class="img-round" --> 
 	                <span class="label label-info unread-counter">{{ unread_count }}</span>
-	                <span class="site-title">{{site.title}}</span> 
+	                <span class="site-title">{{site.display_title}}</span> 
                     <span class="folder">
                         <select>
                             <option value="">--</option>
