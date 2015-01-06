@@ -26,7 +26,7 @@ Instalation
 	$ cd cheddar
 
 
-Then a file named `localenv.sh` and add the following line:
+Then create a file named `localenv.sh` and add the following line:
 	
 	export DJANGO_SETTINGS_MODULE='cheddar.settings.myconf'
 
@@ -73,6 +73,7 @@ just run before `source envs.py`, like this:
     $ cd src
     $ python manage.py shell
     $ python manage.py celery worker -l ERROR
+    $ python manage.py whateva
 
 
 Running the basics
@@ -95,14 +96,16 @@ On shell 2:
 
     $ cd cheddar/
     $ source envs.sh
-    $ python manage.py celery worker -l WARN -Q update_site_feed
+    $ cd src/
+    $ python manage.py celery worker -l WARN -Q update_site_feed -n w1
     
 
 On shell 3:
 
     $ cd cheddar/
     $ source envs.sh
-    $ python manage.py celery worker -B -l WARN -Q make_request,parse_feed
+    $ cd src/
+    $ python manage.py celery worker -B -l WARN -Q make_request,parse_feed -n w2
     
 
 Now you can create your superuser and access http://localhost:16001/admin/ and
@@ -115,9 +118,10 @@ Note about SQLite
 
 Yet we avoid using database-specific features in the future we may need to use
 database views, stored procedure or others, SQLite is a single-writer database
-which, under Cheddar conditions, becomes a problem since we heavily 
+which, under Cheddar conditions, becomes a problem since we heavily use
 multiprocessing with Celery, so you will experiment lots of "database is locked"
 errors.
 
 If you don't want to mess your desktop with databases running, start an instance
-of a Linux running PostgreSQL and use it, or MySQL.
+of a Linux in any cloud service you may like, in this case we suggest using tmux
+to handle multiple shells.
