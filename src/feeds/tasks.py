@@ -42,7 +42,7 @@ def parse_feed(rawdata):
         # Error downloading feed
         return {'feed_error': True}
     result = feedparser.parse(rawdata[2])
-    if result.bozo > 0:
+    if result.bozo > 0 and not result.entries:
         return {'feed_error': True}
     else:
         return result
@@ -73,7 +73,10 @@ def update_site_feed(site):
         info = feed['feed']
         if 'title' in info:
             site.title = info['title']
-        if 'link' in info:
+            
+        # For some reason, some Google Alerts returns a not valid FQDN info after parsed
+        # and then we must check if it starts with "http"
+        if 'link' in info and info['link'].startswith('http'):
             site.url = info['link']
         if site.feed_errors > 0:
             site.feed_errors = 0

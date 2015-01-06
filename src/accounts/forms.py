@@ -53,11 +53,12 @@ class SubscribeFeedForm(forms.Form):
         except (urllib2.HTTPError, urllib2.URLError, socket.error), e:
             raise ValidationError(_(u'Failed trying to parse {}. Error was: {}').format(url, e))
         except socket.timeout, e:
-            raise ValidationError(_(u'Timedout trying to download {}, server took more than {} seconds to return.').format(url, settings.CRAWLER_TIMEOUT))
+            raise ValidationError(_(u'Timeout trying to download {}, server took more than {} seconds to return.').format(url, settings.CRAWLER_TIMEOUT))
             
         
         feed = feedparser.parse(content)
-        if feed['bozo'] == 1:
+
+        if feed['bozo'] == 1 and not feed.entries:
             # Invalid feed content, trying to check if there is a feed on the HTML content
             parser = FindLinkToFeedParser()
             parser.feed(content)
