@@ -1,6 +1,8 @@
 Django>=1.5
 django-celery>=3.0.11
+python-memcached
 
+sierra-django-json-mixin-form
 listparser
 feedparser
 django-extensions

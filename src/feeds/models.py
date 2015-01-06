@@ -52,6 +52,11 @@ class Site(BaseModel):
             ['feed_errors', 'last_update'],
         ]        
     
+    
+    def display_title(self):
+        '''Return the site title or its feed url'''
+        return self.title if self.title else self.feed_url
+    
     @property
     def task(self):
         '''Returns the current task running this site'''

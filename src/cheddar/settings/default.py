@@ -8,6 +8,7 @@ PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.
 CRAWLER_USER_AGENT = 'Cheddar Reader Crawler/1.0'
 CRAWLER_TIMEOUT = 30 # Avoid setting a high timeout, unless you can aford it
 CRAWLER_MAX_FEED_SIZE = 50*1024*1024 # Maximum size in bytes to read from a feed, this may lead to MemoryErrors when to much high 
+CRAWLER_MAX_FEED_SITE_SITE = 2*1024*1024 # Maximum site in bytes to read from a feed while adding feeds on the site
 
 MIN_UPDATE_INTERVAL_SECONDS = 600 # Updates at max 6 times per hour
 MIN_UPDATE_INTERVAL = timedelta(seconds=MIN_UPDATE_INTERVAL_SECONDS) 
@@ -15,6 +16,7 @@ MAX_UPDATE_INTERVAL_SECONDS = 12*3600 # Updates at last 2 times per day
 MAX_UPDATE_INTERVAL = timedelta(MAX_UPDATE_INTERVAL_SECONDS)
 MAX_UPDATE_WAIT = timedelta(hours=48) # After 2 days without updates, force another one
 MAX_FEED_ERRORS_ALLOWED = 10 # After this much errors, next update will always be the max interval
+MAX_FINAL_URL_TRIES = 10 # How much times we should try to find the final URL for a post
 CHEDDAR_HISTORY_SIZE = 20 # How much posts should be considered to calculate next update
 
 
@@ -97,6 +99,15 @@ INSTALLED_APPS = (
     'feeds',
     'accounts',
 )
+
+TEMPLATE_CONTEXT_PROCESSORS = ("django.contrib.auth.context_processors.auth",
+"django.core.context_processors.debug",
+"django.core.context_processors.i18n",
+"django.core.context_processors.media",
+"django.core.context_processors.static",
+"django.core.context_processors.tz",
+"django.contrib.messages.context_processors.messages",
+"django.core.context_processors.request")
 
 LOGGING = {
     'version': 1,

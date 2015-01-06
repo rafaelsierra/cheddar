@@ -21,33 +21,141 @@ import json
 import logging
 import urllib2
 from django.views.generic.detail import SingleObjectMixin
+from accounts.forms import AddFolderForm, SubscribeFeedForm
+import datetime
 
 logger = logging.getLogger('feeds.views')
 
-class HomeView(TemplateView, LoginRequiredMixin):
+class HomeView(LoginRequiredMixin, ListView):
+    model = Post
     template_name = 'feeds/home.html'
+    context_object_name = 'posts'
+    
+    def get_context_data(self, **kwargs):
+        context = super(HomeView, self).get_context_data(**kwargs)
+        context['order'] = self.get_ordering()
+        context['current_site'] = self.get_site() 
+        return context
+    
+    
+    def get_site(self):
+        '''Returns site instance if set or None'''
+        if 'site' in self.request.REQUEST:
+            return Site.objects.get(id=self.request.REQUEST['site'])
+        elif 'site' in self.kwargs:
+            return Site.objects.get(id=self.kwargs['site'])
+    
+    
+    def get_folder(self):
+        '''Returns folder instance if set or None'''
+        if 'folder' in self.request.REQUEST:
+            return Folder.objects.get(id=self.request.REQUEST['folder'])
+        elif 'folder' in self.kwargs:
+            return Folder.objects.get(id=self.kwargs['folder'])    
 
-    
-class CheddarJSView(TemplateView):
-    template_name = 'feeds/cheddar.js'
-    
-    def dispatch(self, *args, **kwargs):
-        response = super(CheddarJSView, self).dispatch(*args, **kwargs)
-        response['Content-Type'] = 'text/javascript'
-        return response
-    
 
-class UserSiteList(ListView, LoginRequiredMixin):
-    template_name = 'feeds/ajax/site-list.html'
+    def get_ordering(self):
+        '''Returns what order will be applied in the query'''
+        order = None
+        # Checks if the order was sent in GET/POST or right from URL
+        if 'order' in self.request.REQUEST:
+            order = self.request.REQUEST['order'].lower()
+        if 'sort' in self.kwargs:
+            order = self.kwargs['order'].lower()
+
+        if not order in ('asc', 'desc'):
+            # If no order was sent yet (or is wrong), checks if it is in the session
+            return self.request.session.get('ordering', 'asc')
+        else:
+            # If a order method is sent in the URL, change the user session ordering
+            self.request.session['ordering'] = order
+            
+        return order
+            
+
+    def get_queryset(self):
+        is_read = self.kwargs.get('is_read', False)
+        is_starred = 'is_starred' in self.kwargs
+        order = self.get_ordering()
+
+        if is_starred:
+            queryset = UserSite.posts.starred(self.request.user)
+        else:
+            if is_read:
+                queryset = UserSite.posts.read(self.request.user)
+            else:
+                queryset = UserSite.posts.unread(self.request.user)
+
+        # You can't filter both at once        
+        if self.get_site():
+            queryset = queryset.filter(site=self.get_site())
+        elif self.get_folder():
+            queryset = queryset.filter(site__usersite__folder=self.get_folder())
+
+        # Fake pagination (since reading posts breaks default pagination)
+        if 'since' in self.request.REQUEST:
+            # Sorting also changes the filter
+            if order == 'asc':
+                query = {'captured_at__gt': self.request.REQUEST.get('since')}
+            else:
+                query = {'captured_at__lt': self.request.REQUEST.get('since')}
+            queryset = queryset.filter(**query)
+            
+        # Sort the result
+        if order == 'asc':
+            queryset = queryset.order_by('captured_at')
+        else:
+            queryset = queryset.order_by('-captured_at')
+            
+        queryset = queryset[:42]
+            
+        return queryset
+        
+        
+
+class UserSiteList(LoginRequiredMixin, ListView):
+    '''View to manage subscriptions'''
+    template_name = 'feeds/my-sites.html'
     model = Site
+    context_object_name = 'sites' 
+    
+    def get_context_data(self, **kwargs):
+        context = super(UserSiteList, self).get_context_data(**kwargs)
+        context['folders'] = self.request.user.folders.all()
+        context['add_folder_form'] = AddFolderForm()
+        context['subscribe_form'] = SubscribeFeedForm() if not hasattr(self, 'subscribe_form') else self.subscribe_form
+        if hasattr(self, 'subscribed_success'):
+            context['subscribed_success'] = True
+        return context
+    
     
     def get_queryset(self):
         queryset = super(UserSiteList, self).get_queryset()
         queryset = queryset.filter(usersite__user=self.request.user)
         return queryset
+    
+    
+    def post(self, request):
+        form = SubscribeFeedForm(request.POST)
+        if form.is_valid():
+            feed_url = form.cleaned_data['feed_url']
+            site, created = Site.objects.get_or_create(feed_url=feed_url, defaults={'last_update': datetime.datetime(1990, 1,1), 'next_update':datetime.datetime.utcnow()})
+            if created:
+                try:
+                    site.update_feed()
+                except:
+                    # Nothing to do here
+                    pass
+            usersite = UserSite.objects.get_or_create(site=site, user=request.user)[0]
+            self.subscribed_success = True
+        else:
+            self.subscribe_form = form
+        
+        return self.get(request)
+        
         
     
-class ImportSubscriptionsFormView(FormView, LoginRequiredMixin):
+class ImportSubscriptionsFormView(LoginRequiredMixin, FormView):
     template_name = 'feeds/import.html'
     form_class = ImportSubscriptionForm
     success_url = reverse_lazy('feeds:import-success')
@@ -73,53 +181,8 @@ class ImportSubscriptionsFormView(FormView, LoginRequiredMixin):
         return super(ImportSubscriptionsFormView, self).form_valid(form)
                     
                     
-    
-    
-class UserPostList(ListView, LoginRequiredMixin):
-    template_name = 'feeds/ajax/post-list.html'
-    context_object_name = 'posts'
-    model = Post
-    
-    def get_site(self):
-        '''Returns site instance if set or None'''
-        if 'site' in self.request.REQUEST:
-            return Site.objects.get(id=self.request.REQUEST['site'])
-        
-    
-    def get_folder(self):
-        '''Returns folder instance if set or None'''
-        if 'folder' in self.request.REQUEST:
-            return Folder.objects.get(id=self.request.REQUEST['folder'])    
-    
-    
-    def get_queryset(self):
-        is_read = self.kwargs.get('is_read', False)
-        is_starred = 'is_starred' in self.kwargs
 
-        if is_starred:
-            queryset = UserSite.posts.starred(self.request.user)
-        else:
-            if is_read:
-                queryset = UserSite.posts.read(self.request.user)
-            else:
-                queryset = UserSite.posts.unread(self.request.user)
-
-        # You can't filter both at once        
-        if self.get_site():
-            queryset = queryset.filter(site=self.get_site())
-        elif self.get_folder():
-            queryset = queryset.filter(site__usersite__folder=self.get_folder())
-
-        # Fake pagination (since reading posts breaks default pagination)
-        if 'since' in self.request.REQUEST:
-            queryset = queryset.filter(created_at__gt=self.request.REQUEST.get('since'))
-            
-        queryset = queryset[:42]
-            
-        return queryset
-    
-
-class MarkPostAsRead(View, LoginRequiredMixin, SingleObjectMixin):
+class MarkPostAsRead(LoginRequiredMixin, View, SingleObjectMixin):
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(MarkPostAsRead, self).dispatch(*args, **kwargs)
@@ -136,11 +199,12 @@ class MarkPostAsRead(View, LoginRequiredMixin, SingleObjectMixin):
 
 
 
-class MarkAllAsRead(View, LoginRequiredMixin):
+class MarkAllAsRead(LoginRequiredMixin, View):
     '''Dude, this can take forever...'''
     @method_decorator(csrf_exempt)
     def dispatch(self, *args, **kwargs):
         return super(MarkAllAsRead, self).dispatch(*args, **kwargs)
+    
     
     def post(self, request, **kwargs):
         for post in UserSite.posts.unread(request.user):
@@ -150,7 +214,7 @@ class MarkAllAsRead(View, LoginRequiredMixin):
 
 
 
-class StarPost(View, LoginRequiredMixin, SingleObjectMixin):
+class StarPost(LoginRequiredMixin, View, SingleObjectMixin):
     '''Star the post of user'''
     model = Post
     @method_decorator(csrf_exempt)

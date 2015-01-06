@@ -26,4 +26,13 @@
             <a href="" class="star-post"><i class="icon-star{% if not is_starred %}-empty{% endif%}"></i></a>
         </footer>
     </article>
+    {% if forloop.last %}
+        <a href="?since={{post.captured_at|date:'c'}}&order={{order}}" class="btn btn-primary next">{% trans "Next" %}</a>
+    {% endif %}
+{% empty %}
+    <p>
+        Horray! Empty post list! <i class="icon-thumbs-up"></i>
+    </p>
+    <p>Oh, by the way, do you know python, js, css3 or html5?<br>If you do, you can help improve Cheddar at <a href="https://github.com/rafaelsierra/cheddar/" target="_blank">https://github.com/rafaelsierra/cheddar/</a></p>
 {% endfor %}
+

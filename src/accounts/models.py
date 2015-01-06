@@ -38,6 +38,9 @@ class Folder(BaseModel):
     user = models.ForeignKey(User, related_name='folders')
     name = models.CharField(max_length=32)
     
+    class Meta:
+        ordering = ('name', )
+    
 
 class UserSite(BaseModel):
     user = models.ForeignKey(User, related_name='my_sites')

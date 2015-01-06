@@ -10,32 +10,51 @@
     <li class="divider-vertical"></li>
 {% endblock %}
 
-{% block navbar-buttons-container %}{% endblock %}
-
 {% block container %}
     <div class="row-fluid">
         <!-- Feeds menu -->
-        <div id="left-bar" class="span2 hidden-tablet" data-spy="affix">
-            <div class="btn-toolbar">
-                <div class="btn-group">
-                    <button class="btn" data-toggle="modal" href="#markAllAsReadModal" title="{% trans "Mark all as read" %}"><i class="icon-eye-open"></i></button>
-                    <button class="btn" title="{% trans "Refresh" %}" id="refresh-button"><i class="icon-refresh"></i></button>
-                </div>
-            </div>
+        <div id="left-bar" class="span2 hidden-tablet">
             <div id="social-feed">
                 <ul class="nav nav-list">
                     <li class="nav-header">{% trans "Social" %}</li>
-                    <li><a id="starred-button"><i class="icon-star"></i>{% trans "Starred Items"%}</a></li>
+                    <li><a id="starred-button" href="{% url 'feeds:post-list-starred'%}"><i class="icon-star"></i>{% trans "Starred Items"%}</a></li>
                 </ul>
             </div>
             <div id="sites-container">
                 <ul class="nav nav-list">
-                    <li class="nav-header" id="feed-list">{% trans "Sites" %}</li>
+                    <li class="nav-header" id="feed-list"><a href="{% url "feeds:home"%}">{% trans "Sites" %} <span class="label total-counter"></span></a></li>
+                    {% include "feeds/includes/site-list.html" %}
                 </ul>
             </div>
         </div>
         <!-- Feed content -->
-        <div class="span9 offset2" id="postlist"></div>
+        <div class="span9" id="postlist">
+            <div class="btn-toolbar well actions">
+                {% if current_site %}
+                    <div class="btn-group">
+                        <a class="btn" href="{% url "feeds:home" %}"><i class="icon-arrow-left"></i> {%trans "Back to all posts" %}</a>
+                    </div>
+                {% endif %}
+                <div class="btn-group">
+                    <button class="btn" data-toggle="modal" href="#markAllAsReadModal"><i class="icon-eye-open"></i> {% trans "Mark all as read" %}</button>
+                    <a class="btn" href="{% url 'feeds:my-sites' %}"><i class="icon-align-justify"></i> {% trans "Manage subscriptions"%}</a>
+                </div>
+                <div class="btn-group">
+                    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-cog"></i> {% trans "Settings"%}</a>
+                    <ul class="dropdown-menu">
+                    	<li class="dropdown-submenu">
+                    		<a href="#">{% trans "Sort" %}</a>
+                    		<ul class="dropdown-menu">
+                    			<li><a href="?order=asc"><i class="icon-{% if request.session.ordering == 'asc' %}ok{%else%}arrow-up{% endif %}"></i> {% trans "Ascending"%}</a></li>
+                    			<li><a href="?order=desc"><i class="icon-{% if request.session.ordering == 'desc' %}ok{%else%}arrow-down{% endif %}"></i> {% trans "Descending"%}</a></li>
+                    		</ul>
+                    	</li>
+                    	
+                    </ul>
+                </div>
+            </div>
+            {% include "feeds/includes/post-list.html" with posts=posts%}
+        </div>
     </div>
     <div class="modal hide fade" id="markAllAsReadModal">
         <div class="modal-header">
@@ -59,7 +78,18 @@
 {% endblock %}
 {% block extrascript %}
     <script src="{{STATIC_URL}}feeds/js/jquery.hotkeys.js"></script>
-    <script src="{{STATIC_URL}}feeds/js/jquery.overscroll.js"></script>
-    <script src="{% url 'feeds:cheddarjs' %}"></script>
+    <script>
+        var urls = {
+            'STATIC_URL': '{{STATIC_URL|escapejs}}',
+            'MEDIA_URL': '{{MEDIA_URL|escapejs}}',
+            'mysites': "{% url 'feeds:my-sites' %}",
+            'post_list_read': "{% url 'feeds:post-list-read' %}",
+            'post_list_unread': "{% url 'feeds:post-list-unread' %}",
+            'post_list_starred': "{% url 'feeds:post-list-starred' %}",
+            'mark_post_as_read': "{% url 'feeds:post-mark-as-read' %}",
+            'mark_all_posts_as_read': "{% url 'feeds:post-mark-all-as-read' %}",
+            'star_post': function(postId){return "{% url 'feeds:post-star-it' pk='POSTID' %}".replace('POSTID', postId);}
+        };
+    </script>
     <script src="{{STATIC_URL}}feeds/js/everything.js"></script>
 {% endblock %}    

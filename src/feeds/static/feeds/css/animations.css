@@ -1,3 +1,6 @@
+/**
+ *     SPIN ANIMATION
+ */
 @keyframes spin{
     from{
         transform: rotate(0deg);
@@ -20,6 +23,53 @@
     }
 }
 
+/**
+ *     GLOW ANIMATION
+ */
+@keyframes glow-next{
+    0%,100%{
+        box-shadow:  0px 0px 5px 2px rgba(255,215,0, 0.5);
+        -webkit-box-shadow:  0px 0px 5px 2px rgba(255,215,0, 0.5);
+    }
+    50%{
+        box-shadow:  0px 0px 5px 2px rgba(255,215,0, 0.8);
+        -webkit-box-shadow:  0px 0px 5px 2px rgba(255,215,0, 0.8);
+    }
+}
+
+@-webkit-keyframes glow-next{
+    0%,100%{
+        box-shadow:  0px 0px 5px 2px rgba(255,215,0, 0.5);
+        -webkit-box-shadow:  0px 0px 5px 2px rgba(255,215,0, 0.5);
+    }
+    50%{
+        box-shadow:  0px 0px 5px 2px rgba(255,215,0, 0.8);
+        -webkit-box-shadow:  0px 0px 5px 2px rgba(255,215,0, 0.8);
+    }
+}
+
+@-webkit-keyframes pulse{
+    0%,100%{
+        -webkit-box-shadow: 0px 0px 0px 0px rgba(0,0,0, 0.0);
+    }
+    50%{
+        -webkit-box-shadow: 0px 0px 5px 2px rgba(0,0,0, 0.8);
+    }
+}
+
+@keyframes pulse{
+    0%,100%{
+        box-shadow: 0px 0px 0px 2px rgba(0,0,0, 0);
+    }
+    50%{
+        box-shadow: 0px 0px 5px 2px rgba(0,0,0, 0.8);
+    }
+}
+
+/**
+ *     Classes
+ */
+
 .spin{
     animation: spin 2s;
     -webkit-animation: spin 2s;
@@ -27,4 +77,22 @@
     -webkit-animation-timing-function: linear;
     animation-iteration-count: infinite;
     -webkit-animation-iteration-count: infinite;
+}
+
+.glow{
+    animation: glow-next 3s;
+    -webkit-animation: glow-next 3s;
+    animation-timing-function: linear;
+    -webkit-animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    -webkit-animation-iteration-count: infinite;    
+}
+
+.pulse{
+    -webkit-animation: pulse 0.6s;
+    -webkit-animation-timing-function: ease-in-out;
+    -webkit-animation-iteration-count: 1;
+    animation: pulse 0.6s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: 1;    
 }
