@@ -17,13 +17,13 @@ class BaseModelQueryset(QuerySet):
 
 class BaseModelManager(models.Manager):
     def newest(self):
-        return self.get_query_set().newest()
+        return self.get_queryset().newest()
     
-    def get_query_set(self):
+    def get_queryset(self):
         return BaseModelQueryset(self.model)
 
     def actives(self):
-        return self.get_query_set().actives()
+        return self.get_queryset().actives()
         
 
 class BaseModel(models.Model):
