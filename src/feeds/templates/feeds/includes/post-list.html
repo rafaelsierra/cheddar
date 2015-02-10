@@ -2,7 +2,8 @@
 {% load feedstags %}
 {% for post in posts %}
     {% get_if_starred as is_starred %}
-    <article class="post well" id="post-{{post.id}}" data-created_at="{{post.created_at}}" data-post_id="{{post.id}}" data-site_id="{{post.site.id}}">
+    {% get_is_post_read user=user post=post as is_readed %}
+    <article class="post well {% if is_readed %}post-read{% endif %}" id="post-{{post.id}}" data-created_at="{{post.created_at}}" data-post_id="{{post.id}}" data-site_id="{{post.site.id}}">
         <header>
             <h1>
                 <a class="star-post pull-left"><i class="icon-star{% if not is_starred %}-empty{% endif%}"></i></a>

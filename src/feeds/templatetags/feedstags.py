@@ -28,3 +28,18 @@ def get_site_list(context, user):
     queryset = queryset.filter(usersite__user=user)
     return queryset
 
+
+@register.assignment_tag(takes_context=True)
+def get_is_post_read(context, user=None, post=None):
+    if not user:
+        user = context.get('user')
+        if not user:
+            return None
+        
+    if not post:
+        post = context.get('post')
+        if not post:
+            return None
+        
+    userpost = post.get_userpost(user)        
+    return userpost.is_read

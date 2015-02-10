@@ -7,8 +7,9 @@ from accounts.views import UnsubscribeFeed
 
 urlpatterns = patterns('',
     url(r'^$', HomeView.as_view(), name='home'),
-    url(r'^my/posts/read/$', HomeView.as_view(), {'is_read':True}, name='post-list-read'),
-    url(r'^my/posts/unread/$', HomeView.as_view(), {'is_read':False}, name='post-list-unread'),
+    url(r'^my/posts/all/$', HomeView.as_view(), {'filtering': 'all'}, name='post-list-all'),    
+    url(r'^my/posts/read/$', HomeView.as_view(), {'filtering': 'read'}, name='post-list-read'),
+    url(r'^my/posts/unread/$', HomeView.as_view(), {'filtering': 'unread'}, name='post-list-unread'),
     url(r'^my/posts/starred/$', HomeView.as_view(), {'is_starred':True}, name='post-list-starred'),
     
     url(r'^sites/(?P<site>\d+)/read/$', HomeView.as_view(), {'is_read':False}, name='post-list-unread'),

@@ -49,6 +49,14 @@
                     			<li><a href="?order=desc"><i class="icon-{% if request.session.ordering == 'desc' %}ok{%else%}arrow-down{% endif %}"></i> {% trans "Descending"%}</a></li>
                     		</ul>
                     	</li>
+                    	<li class="dropdown-submenu">
+                    	    <a href="#">{% trans "Post filtering"%}</a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'feeds:post-list-all'%}"><i class="icon-{% if request.session.filtering == 'all' %}ok{%else%}list{% endif %}"></i> {% trans "Show all"%}</a></li>
+                                <li><a href="{% url 'feeds:post-list-unread'%}"><i class="icon-{% if request.session.filtering == 'unread' %}ok{%else%}inbox{% endif %}"></i> {% trans "Only unread"%}</a></li>
+                                <li><a href="{% url 'feeds:post-list-read'%}"><i class="icon-{% if request.session.filtering == 'read' %}ok{%else%}check{% endif %}"></i> {% trans "Only read"%}</a></li>
+                            </ul>                    	    
+                    	</li>
                     	
                     </ul>
                 </div>

@@ -72,19 +72,39 @@ class HomeView(LoginRequiredMixin, ListView):
             
         return order
             
+            
+    def get_post_filter(self):
+        '''Returns a string with the kind of posts de user wishes do see, defaults to "unread"'''
+        filtering = None
+        if 'filtering' in self.request.REQUEST:
+            filtering = self.request.REQUEST['filtering'].lower()
+        if 'filtering' in self.kwargs:
+            filtering = self.kwargs['filtering'].lower()
+            
+        if not filtering in ('all', 'unread', 'read'):
+            return self.request.session.get('filtering', 'unread')
+        else:
+            self.request.session['filtering'] = filtering
+        return filtering
+
 
     def get_queryset(self):
-        is_read = self.kwargs.get('is_read', False)
         is_starred = 'is_starred' in self.kwargs
+
+        post_filter = self.get_post_filter()
         order = self.get_ordering()
 
         if is_starred:
+            # When reading starred posts, filtering don't matter
             queryset = UserSite.posts.starred(self.request.user)
         else:
-            if is_read:
+            print post_filter
+            if post_filter == 'read':
                 queryset = UserSite.posts.read(self.request.user)
-            else:
+            elif post_filter == 'unread':
                 queryset = UserSite.posts.unread(self.request.user)
+            else: #if == 'all'
+                queryset = UserSite.posts.all(self.request.user)
 
         # You can't filter both at once        
         if self.get_site():
