@@ -47,7 +47,7 @@
                 $("#markAllAsReadModal p:not(.alert)").hide();
                 $("#markAllAsReadModal p.alert").show();
             }
-        })
+        });
     }    
 
     /**
