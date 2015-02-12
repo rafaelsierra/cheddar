@@ -22,7 +22,7 @@
                 {{subscribe_form}}
                 <button class="btn btn-primary">{% trans "Save" %}</button>
             </form>
-            <a href="{% url 'feeds:export'%}" class="btn">{% trans "Export my full OPML"%}</a>
+            <a href="{% url 'feeds:export'%}" class="btn"><i class="icon-share"></i> {% trans "Export my full OPML"%}</a>
         </div>
         <ul class="unstyled">
             {% for site in sites %}
@@ -66,6 +66,7 @@
                 <li class="well edit-folder">
                     <span class="label label-info">{{usersites.count}} {% trans "sites"%}</span>
                     {{folder.name}}
+                    <a class="btn btn-primary export-folder-opml" href="{% url 'feeds:export'%}?folder={{folder.id}}"><i class="icon-share icon-white"></i> {% trans "Export OPML" %}</a>
                 </li>
             {% endfor %}
         </ul>        

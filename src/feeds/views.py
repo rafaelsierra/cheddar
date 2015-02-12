@@ -221,22 +221,28 @@ class ExportSubscriptionsView(LoginRequiredMixin, View):
         root.append(head)
         return root
         
+    
+    def _get_folder_outline(self, folder):
+        folder_outline = Element('outline')
+        folder_outline.set('text', folder.name)
+        for usersite in folder.usersite.actives():
+            outline = Element('outline')
+            outline.set('text', usersite.site.title or 'None')
+            outline.set('title', usersite.site.title or 'None')            
+            outline.set('type', 'rss')                
+            outline.set('xmlUrl', usersite.site.feed_url)
+            outline.set('htmlUrl', usersite.site.url if usersite.site.url else usersite.site.feed_url)     
+            folder_outline.append(outline)
+        return folder_outline
+        
+        
     def write_full_opml(self, response):
         folders = self.request.user.folders.actives()
         root = self.get_xml_root()
         body = Element('body')
         # Loops over all the folders to keep them
         for folder in folders:
-            folder_outline = Element('outline')
-            folder_outline.set('text', folder.name)
-            for usersite in folder.usersite.actives():
-                outline = Element('outline')
-                outline.set('text', usersite.site.title or 'None')
-                outline.set('title', usersite.site.title or 'None')            
-                outline.set('type', 'rss')                
-                outline.set('xmlUrl', usersite.site.feed_url)
-                outline.set('htmlUrl', usersite.site.url if usersite.site.url else usersite.site.feed_url)     
-                folder_outline.append(outline)
+            folder_outline = self._get_folder_outline(folder)
             body.append(folder_outline)
 
         for usersite in self.request.user.my_sites.actives().filter(folder__isnull=True):
@@ -250,6 +256,23 @@ class ExportSubscriptionsView(LoginRequiredMixin, View):
             
         root.append(body)
         response.write(self.prettify(root))
+
+    
+    def write_folder_opml(self, response):
+        folders = self.request.user.folders.actives()
+        root = self.get_xml_root()
+        body = Element('body')
+        
+        folder = Folder.objects.get(id=self.request.REQUEST['folder'])
+        if folder.user.id != self.request.user.id:
+            raise Http404()
+        
+        
+        folder_outline = self._get_folder_outline(folder)
+        body.append(folder_outline)
+        root.append(body)
+        response.write(self.prettify(root))
+        
     
     def prettify(self, elem):
         raw_string = tostring(elem, 'utf-8')
@@ -264,7 +287,7 @@ class ExportSubscriptionsView(LoginRequiredMixin, View):
         else:
             self.write_full_opml(response)
 
-        #response['Content-Disposition'] = 'attachment; filename="{}-cheddar.ompl"'.format(self.request.user.username)
+        response['Content-Disposition'] = 'attachment; filename="{}-cheddar.ompl"'.format(self.request.user.username)
         return response
         
 
