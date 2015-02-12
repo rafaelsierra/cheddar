@@ -8,7 +8,7 @@
 
 {% block container %}
     <div class="row-fluid">
-        <h1>{% trans "Your subscriptions"%}</h1>
+        <h1>{% trans "Subscriptions"%}</h1>
         <div class="well">
             {% if subscribed_success %}
                 <div class="alert alert-success">
@@ -22,14 +22,15 @@
                 {{subscribe_form}}
                 <button class="btn btn-primary">{% trans "Save" %}</button>
             </form>
-        </div>  
+            <a href="{% url 'feeds:export'%}" class="btn">{% trans "Export my full OPML"%}</a>
+        </div>
         <ul class="unstyled">
             {% for site in sites %}
                 {% get_usersite user=user site=site as usersite %}
                 {% get_unread_count_for_site as unread_count %}
                 <li class="well edit-site" data-usersite_id="{{usersite.id}}" id="site-{{site.id}}" {% if folder %}data-folder="{{folder.name}}" data-folder_id="{{folder.id}}"{% endif %}>
 	                <!-- img src="{% url 'feeds:proxy-favicon' pk=site.id %}" width="16" height="16" class="img-round" --> 
-	                <span class="label label-info unread-counter">{{ unread_count }}</span>
+	                <span class="label label-info unread-counter">{{ unread_count }} {% trans "unread posts"%}</span>
 	                <span class="site-title">{{site.display_title}}</span> 
                     <span class="folder">
                         <select>
@@ -47,7 +48,10 @@
                     </form>
                 </li>
             {% endfor %}
-        </ul>
+        </ul>   
+        <hr>
+        
+        <h1>{% trans "Folders"%}</h1>
         <div class="well">
             <form class="form-inline" action="{% url 'accounts:add-folder' %}" method="post" id="add-folder">
                 {% csrf_token %}
@@ -55,7 +59,16 @@
                 {{add_folder_form}}
                 <button class="btn btn-primary">{% trans "Save" %}</button>
             </form>
-        </div>        
+        </div>             
+        <ul class="unstyled">
+            {% for folder in folders %}
+                {% get_folder_usersites as usersites %}
+                <li class="well edit-folder">
+                    <span class="label label-info">{{usersites.count}} {% trans "sites"%}</span>
+                    {{folder.name}}
+                </li>
+            {% endfor %}
+        </ul>        
     </div>
 {% endblock %}
 

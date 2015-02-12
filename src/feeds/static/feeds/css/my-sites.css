@@ -1,7 +1,8 @@
 select {
     margin-bottom: 0;
 }
-li.edit-site{
+
+li.edit-site, li.edit-folder{
     padding: 5px;
     margin-bottom: 5px;
     height: 29px;

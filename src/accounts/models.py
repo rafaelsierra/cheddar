@@ -51,7 +51,7 @@ class Folder(BaseModel):
 class UserSite(BaseModel):
     user = models.ForeignKey(User, related_name='my_sites')
     site = models.ForeignKey(Site, related_name='usersite')
-    folder = models.ForeignKey(Folder, null=True, blank=True)
+    folder = models.ForeignKey(Folder, null=True, blank=True, related_name='usersite')
     
     posts = UserSitePostsManager()
     

@@ -2,7 +2,8 @@
 from django.conf.urls import patterns, include, url
 from django.views.generic.base import TemplateView
 from feeds.views import HomeView, UserSiteList, MarkPostAsRead, \
-    ImportSubscriptionsFormView, proxy_favicon, StarPost, MarkAllAsRead
+    ImportSubscriptionsFormView, proxy_favicon, StarPost, MarkAllAsRead,\
+    ExportSubscriptionsView
 from accounts.views import UnsubscribeFeed
 
 urlpatterns = patterns('',
@@ -20,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^my/sites/unsubscribe/$', UnsubscribeFeed.as_view(), name='unsubscribe'),
     url(r'^my/sites/import/$', ImportSubscriptionsFormView.as_view(), name='import'),
     url(r'^my/sites/import/success/$', TemplateView.as_view(template_name='feeds/import-success.html'), name='import-success'),
+    url(r'^my/sites/export/$', ExportSubscriptionsView.as_view(), name='export'),
     
     url(r'^my/posts/mark-as-read/$', MarkPostAsRead.as_view(), name='post-mark-as-read'),
     url(r'^my/posts/mark-all-as-read/$', MarkAllAsRead.as_view(), name='post-mark-all-as-read'),

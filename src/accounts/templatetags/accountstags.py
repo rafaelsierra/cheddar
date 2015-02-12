@@ -59,3 +59,17 @@ def get_usersite(context, user, site):
 def get_unsubscribe_form(context, usersite):
     form = UnsubscribeFeedForm(instance=usersite)
     return form
+
+
+
+@register.assignment_tag(takes_context=True)
+def get_folder_usersites(context, folder=None):
+    '''Returns all the sites a folder contains'''        
+    if not folder:
+        folder = context.get('folder', None)
+        if not folder:
+            raise TemplateSyntaxError('You must inform what folder you want to list')
+        
+    return folder.usersite.actives()
+    
+       

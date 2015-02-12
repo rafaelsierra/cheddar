@@ -23,6 +23,8 @@ import urllib2
 from django.views.generic.detail import SingleObjectMixin
 from accounts.forms import AddFolderForm, SubscribeFeedForm
 import datetime
+from xml.etree.ElementTree import Element, Comment, tostring
+from xml.dom import minidom
 
 logger = logging.getLogger('feeds.views')
 
@@ -201,6 +203,71 @@ class ImportSubscriptionsFormView(LoginRequiredMixin, FormView):
         return super(ImportSubscriptionsFormView, self).form_valid(form)
                     
                     
+class ExportSubscriptionsView(LoginRequiredMixin, View):
+    def get_xml_root(self):
+        # Root element
+        root = Element('opml')
+        root.set('version', '1.0')
+        root.append(Comment('Created by Cheddar to {}'.format(self.request.user.username)))
+        # Head element
+        head = Element('head')
+        title = Element('title')
+        title.text = 'Subscriptions'
+        dc = Element('dateCreated')
+        dc.text = str(timezone.now())
+        head.append(dc)
+        head.append(title)
+        # Append to root
+        root.append(head)
+        return root
+        
+    def write_full_opml(self, response):
+        folders = self.request.user.folders.actives()
+        root = self.get_xml_root()
+        body = Element('body')
+        # Loops over all the folders to keep them
+        for folder in folders:
+            folder_outline = Element('outline')
+            folder_outline.set('text', folder.name)
+            for usersite in folder.usersite.actives():
+                outline = Element('outline')
+                outline.set('text', usersite.site.title or 'None')
+                outline.set('title', usersite.site.title or 'None')            
+                outline.set('type', 'rss')                
+                outline.set('xmlUrl', usersite.site.feed_url)
+                outline.set('htmlUrl', usersite.site.url if usersite.site.url else usersite.site.feed_url)     
+                folder_outline.append(outline)
+            body.append(folder_outline)
+
+        for usersite in self.request.user.my_sites.actives().filter(folder__isnull=True):
+            outline = Element('outline')
+            outline.set('text', usersite.site.title or 'None')
+            outline.set('title', usersite.site.title or 'None')            
+            outline.set('type', 'rss')
+            outline.set('xmlUrl', usersite.site.feed_url)
+            outline.set('htmlUrl', usersite.site.url if usersite.site.url else usersite.site.feed_url)                 
+            body.append(outline)
+            
+        root.append(body)
+        response.write(self.prettify(root))
+    
+    def prettify(self, elem):
+        raw_string = tostring(elem, 'utf-8')
+        parsed = minidom.parseString(raw_string)
+        return parsed.toprettyxml('    ')
+        
+    
+    def get(self, *args, **kwargs):
+        response = HttpResponse()
+        if 'folder'  in self.request.REQUEST:
+            self.write_folder_opml(response)
+        else:
+            self.write_full_opml(response)
+
+        #response['Content-Disposition'] = 'attachment; filename="{}-cheddar.ompl"'.format(self.request.user.username)
+        return response
+        
+
 
 class MarkPostAsRead(LoginRequiredMixin, View, SingleObjectMixin):
     @method_decorator(csrf_exempt)
