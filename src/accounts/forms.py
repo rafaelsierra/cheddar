@@ -51,7 +51,7 @@ class SubscribeFeedForm(forms.Form):
             # But if you do this, I hope you burn in hell with Satan sodomizing you with a fork.
             content = urllib2.urlopen(url, timeout=settings.CRAWLER_TIMEOUT).read(settings.CRAWLER_MAX_FEED_SITE_SITE)
         except (urllib2.HTTPError, urllib2.URLError, socket.error), e:
-            raise ValidationError(_(u'Failed trying to parse {}. Error was: {}').format(url, e))
+            raise ValidationError(_(u'Failed trying to parse {}. Error was: {}').format(url, e.message))
         except socket.timeout, e:
             raise ValidationError(_(u'Timeout trying to download {}, server took more than {} seconds to return.').format(url, settings.CRAWLER_TIMEOUT))
             
