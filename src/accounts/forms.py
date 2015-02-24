@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext as _
 from feeds.models import Site
 from feeds.utils import build_request, FindLinkToFeedParser
 import urllib2
