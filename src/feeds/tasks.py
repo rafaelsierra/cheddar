@@ -13,7 +13,6 @@ import feedparser
 import socket
 import time
 import urllib2
-from feeds.utils import get_sanitized_html
 
 
 logger = get_task_logger(__name__)
@@ -55,7 +54,7 @@ def update_site_feed(site):
     since in the end it will call another apply_async onto himself'''
     from feeds.models import Post
     from feeds.utils import get_final_url
-    
+    from feeds.utils import get_sanitized_html
     # Avoids running two instances at the time
     # Update task_id for this site
     site.task_id = update_site_feed.request.id
