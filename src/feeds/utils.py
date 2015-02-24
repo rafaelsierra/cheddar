@@ -7,7 +7,8 @@ from feeds.tasks import make_request, parse_feed
 import socket
 import logging
 import sgmllib
-    
+from bs4 import BeautifulSoup
+
 
 def build_request(url):
     '''Returns a urllib2.Request instance to urlopen'''
@@ -35,7 +36,7 @@ def get_final_url(url, times_left=settings.MAX_FINAL_URL_TRIES):
     
     logging.debug(u'Checking final URL for {}'.format(url))
     try:
-        post = urllib2.urlopen(build_request(url), timeout=5)
+        post = urllib2.urlopen(build_request(url), timeout=settings.CRAWLER_TIMEOUT)
     except (urllib2.URLError, urllib2.HTTPError, socket.error, socket.timeout), e:
         logging.exception(u'Failed trying to download {}'.format(url))
         return url
@@ -48,6 +49,18 @@ def get_final_url(url, times_left=settings.MAX_FINAL_URL_TRIES):
         logging.debug(u'Post URL {} checked OK'.format(url))
         
     return post.geturl()
+
+
+
+def get_sanitized_html(html):
+    '''Fixes DOM and remove crap tags'''
+    bs = BeautifulSoup(html)
+    for tag in ('script', 'style'):
+        for item in bs.findAll(tag):
+            item.extract()
+    html = bs.prettify()
+    
+    return
 
 
 

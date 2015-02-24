@@ -13,6 +13,7 @@ import feedparser
 import socket
 import time
 import urllib2
+from feeds.utils import get_sanitized_html
 
 
 logger = get_task_logger(__name__)
@@ -111,7 +112,9 @@ def update_site_feed(site):
                 
             if isinstance(content, dict):
                 content = content.get('value')
-                
+            # Parses the content to avoid broken HTML and script tags
+            content = get_sanitized_html(content)
+            
             author = entry.get('author')
             
             if 'published_parsed' in entry and entry.get('published_parsed'):
