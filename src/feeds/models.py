@@ -10,8 +10,8 @@ from django.template.defaultfilters import time as timefilter, \
 from django.utils import timezone
 from django.utils.timezone import is_aware, utc
 from feeds.signals import start_feed_update
-from feeds.tasks import update_site_feed, make_request
-from feeds.utils import feedopen
+from feeds.tasks import update_site_feed, make_request, parse_feed
+from feeds.utils import build_request
 import base64
 import celery
 import datetime
@@ -84,8 +84,10 @@ class Site(BaseModel):
     # I don't think update() would be a good name here
     def update_feed(self):
         # Celery has an contrib module to handle instance methods, but I've
-        # never used it, so I don't know if we should trust if 
-        update_site_feed.delay(self)
+        # never used it, so I don't know if we should trust it 
+        request = build_request(self.feed_url)
+        chain = make_request.s(request)|parse_feed.s()|update_site_feed.s(self)
+        chain.delay()
 
     
     def save(self, *args, **kwargs):
@@ -97,11 +99,6 @@ class Site(BaseModel):
         else:
             super(Site, self).save(*args, **kwargs)
         
-    
-    def getfeed(self):
-        '''Opens self.feed_url and parses it'''
-        return feedopen(self.feed_url)
-
     
     def set_next_update(self, save=True):
         '''

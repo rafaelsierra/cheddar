@@ -49,7 +49,7 @@ def parse_feed(rawdata):
 
 
 @celery.task()
-def update_site_feed(site):
+def update_site_feed(feed, site):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
     from feeds.models import Post
@@ -60,7 +60,6 @@ def update_site_feed(site):
     site.task_id = update_site_feed.request.id
     site.save()
     
-    feed = site.getfeed()
     # Update this site info
     if not 'feed' in feed:
         logger.warn(u"Site {} feed did not returned feed information".format(site.id))
@@ -152,7 +151,8 @@ def update_site_feed(site):
     site.last_update = timezone.now()
     cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
     cache.delete(cachekey) # Release this site to run again
-    site.save()    
+    site.save()
+
     
     
 @celery.task()

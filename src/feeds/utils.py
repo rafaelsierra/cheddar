@@ -16,16 +16,7 @@ def build_request(url):
     request.add_header('User-Agent', settings.CRAWLER_USER_AGENT)
     return request
     
-
-def feedopen(url):
-    request = build_request(url)
-    # TODO: This is not working as I expected. I'm having lots of worker 
-    # deadlocks and I think this granularity is the cause
-    # http://docs.celeryproject.org/en/latest/userguide/tasks.html#avoid-launching-synchronous-subtasks
-    #chain = make_request.s(request)|parse_feed.s()
-    feed = parse_feed(make_request(request))
-    return feed
-
+    
 
 def get_final_url(url, times_left=settings.MAX_FINAL_URL_TRIES):
     '''Loops over url until it doesn't change (e.g. feedburner or shortened)'''
