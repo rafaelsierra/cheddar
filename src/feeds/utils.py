@@ -54,6 +54,10 @@ def get_final_url(url, times_left=settings.MAX_FINAL_URL_TRIES):
 
 def get_sanitized_html(html):
     '''Fixes DOM and remove crap tags'''
+    # html must be some kind of string 
+    if not isinstance(html, basestring):
+        return html
+    
     bs = BeautifulSoup(html)
     for tag in ('script', 'style'):
         for item in bs.findAll(tag):
