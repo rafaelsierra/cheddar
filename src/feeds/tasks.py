@@ -149,22 +149,13 @@ def update_site_feed(feed, site):
     next_update = site.set_next_update(save=False)
     logger.info("Site's {} next update at {}".format(site.id, next_update))
     site.last_update = timezone.now()
-    cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
-    cache.delete(cachekey) # Release this site to run again
     site.save()
 
     
     
 @celery.task()
 def check_sites_for_update():
-    '''Check if site's crawler should run'''
-    # Avoids running two instances at the time
-    if cache.get(CHECK_CACHE_KEY):
-        logger.warn('Worker for checking sites still running')
-        return
-    
-    cache.add(CHECK_CACHE_KEY, '1', 3600) # Will not run again for 1 hour
-    
+    '''Check if site's crawler should run'''    
     from feeds.models import Site
     sites = Site.objects.need_update()
         
@@ -172,14 +163,8 @@ def check_sites_for_update():
     
     for site in sites:
         # Checks if this site was put to run recently
-        cachekey = SITE_WORKER_CACHE_KEY.format(id=site.id)
-        
         if not site.task or site.task.status in (u'SUCCESS', u'FAILURE', u'REVOKED'):
             logger.warn('Starting task for site {}'.format(site.id))
-            if cache.get(cachekey):
-                logger.warn('Worker for site {} still running'.format(site.id))
-                continue
-            cache.add(cachekey, '1', 600) # Will not run again in 10 minutes
             site.last_update = timezone.now()
             site.save()
             site.update_feed()
@@ -192,6 +177,5 @@ def check_sites_for_update():
                 site.task_id = None
                 site.save()
     
-    cache.delete(CHECK_CACHE_KEY)
     
     
