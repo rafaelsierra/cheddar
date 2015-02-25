@@ -60,7 +60,7 @@ def get_sanitized_html(html):
             item.extract()
     html = bs.prettify()
     
-    return
+    return html
 
 
 
