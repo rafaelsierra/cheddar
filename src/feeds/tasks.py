@@ -180,7 +180,8 @@ def check_sites_for_update():
                 logger.warn('Worker for site {} still running'.format(site.id))
                 continue
             cache.add(cachekey, '1', 600) # Will not run again in 10 minutes
-
+            site.last_update = timezone.now()
+            site.save()
             site.update_feed()
         else:
             logger.warn('Tried to start another task for site {} but status is {}'.format(site.id, site.task.status))
