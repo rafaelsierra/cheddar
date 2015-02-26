@@ -14,7 +14,7 @@ MIN_UPDATE_INTERVAL_SECONDS = 600 # Updates at max 6 times per hour
 MIN_UPDATE_INTERVAL = timedelta(seconds=MIN_UPDATE_INTERVAL_SECONDS) 
 MAX_UPDATE_INTERVAL_SECONDS = 12*3600 # Updates at last 2 times per day
 MAX_UPDATE_INTERVAL = timedelta(MAX_UPDATE_INTERVAL_SECONDS)
-MAX_UPDATE_WAIT = timedelta(hours=48) # After 2 days without updates, force another one
+MAX_UPDATE_WAIT = timedelta(seconds=3600) # After 1 hour without updates and supposedly running, force another one
 MAX_FEED_ERRORS_ALLOWED = 10 # After this much errors, next update will always be the max interval
 MAX_FINAL_URL_TRIES = 10 # How much times we should try to find the final URL for a post
 CHEDDAR_HISTORY_SIZE = 20 # How much posts should be considered to calculate next update
@@ -149,5 +149,10 @@ CELERYBEAT_SCHEDULE = {
         'schedule': timedelta(seconds=60),
     },
 }
+CELERY_TASK_RESULT_EXPIRES = 10 # 10 seconds to expire the result
+CELERY_TRACK_STARTED = True
+CELERY_ACKS_LATE = False
+CELERY_SEND_EVENTS = True
+
 import djcelery
 djcelery.setup_loader()
