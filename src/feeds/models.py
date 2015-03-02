@@ -25,7 +25,16 @@ logger = logging.getLogger('feeds.tasks')
 class SiteManager(BaseModelManager):
     def need_update(self):
         '''Returns what sites needs update'''
-        return self.get_queryset().filter(next_update__lte=timezone.now(), last_update__lt=models.F('next_update')).order_by('next_update')
+        max_last_update = timezone.now() - settings.MAX_UPDATE_WAIT
+        # Query below:
+        # [next update is due] AND 
+        # (
+        #     [last update set to before than next update] OR 
+        #     [last update is unacceptable]
+        # )
+        return self.get_queryset().filter(next_update__lte=timezone.now()).filter( 
+            models.Q(last_update__lt=models.F('next_update'))|models.Q(last_update__lt=max_last_update)
+        ).order_by('next_update')
         
 
 class Site(BaseModel):
