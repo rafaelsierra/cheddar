@@ -1,0 +1,66 @@
+# vim: set shiftwidth=2:
+version: "2"
+
+services:
+  #
+  # Requirements to run Cheddar
+  #
+  memcached:
+    image: memcached:alpine
+    restart: always
+    ports: 
+      - "11211"
+
+  redis:
+    image: redis:alpine
+    restart: always
+    ports: 
+      - "6379"
+
+  postgres:
+    image: postgres
+    restart: always
+    ports: 
+      - "5432"
+    env_file: 
+      - confs.env
+
+  # 
+  # Base cheddar config
+  #
+  cheddar:
+    build:
+      context: src/
+    command: "false"
+    restart: never
+    env_file:
+      - confs.env
+
+  cheddar-web:
+    extends: cheddar
+    command: "./gunicorn.sh"
+    links:
+      - redis
+      - memcached
+      - postgres
+    restart: always
+    ports:
+      - "8000:8000"
+
+  cheddar-beat:
+    extends: cheddar
+    command: "python manage.py celery beat -l INFO"
+    links:
+      - redis
+      - memcached
+      - postgres
+    restart: always
+
+  cheddar-worker:
+    extends: cheddar
+    command: "python manage.py celery worker -l INFO --autoscale=10,1"
+    links:
+      - redis
+      - memcached
+      - postgres
+    restart: always

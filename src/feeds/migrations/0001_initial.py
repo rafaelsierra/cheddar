@@ -1,71 +1,59 @@
 # -*- coding: utf-8 -*-
-import datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import migrations, models
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Site'
-        db.create_table(u'feeds_site', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, db_index=True, blank=True)),
-            ('updated_at', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('is_active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('url', self.gf('django.db.models.fields.URLField')(max_length=200, null=True, blank=True)),
-            ('feed_url', self.gf('django.db.models.fields.URLField')(unique=True, max_length=200)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=256, null=True, blank=True)),
-        ))
-        db.send_create_signal(u'feeds', ['Site'])
+    dependencies = [
+    ]
 
-        # Adding model 'Post'
-        db.create_table(u'feeds_post', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('created_at', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, db_index=True, blank=True)),
-            ('updated_at', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('is_active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-            ('site', self.gf('django.db.models.fields.related.ForeignKey')(related_name='posts', to=orm['feeds.Site'])),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=1024)),
-            ('content', self.gf('django.db.models.fields.TextField')()),
-            ('author', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('url', self.gf('django.db.models.fields.URLField')(max_length=256)),
-        ))
-        db.send_create_signal(u'feeds', ['Post'])
-
-
-    def backwards(self, orm):
-        # Deleting model 'Site'
-        db.delete_table(u'feeds_site')
-
-        # Deleting model 'Post'
-        db.delete_table(u'feeds_post')
-
-
-    models = {
-        u'feeds.post': {
-            'Meta': {'object_name': 'Post'},
-            'author': ('django.db.models.fields.CharField', [], {'max_length': '64'}),
-            'content': ('django.db.models.fields.TextField', [], {}),
-            'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'site': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'posts'", 'to': u"orm['feeds.Site']"}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '1024'}),
-            'updated_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'url': ('django.db.models.fields.URLField', [], {'max_length': '256'})
-        },
-        u'feeds.site': {
-            'Meta': {'object_name': 'Site'},
-            'created_at': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'db_index': 'True', 'blank': 'True'}),
-            'feed_url': ('django.db.models.fields.URLField', [], {'unique': 'True', 'max_length': '200'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '256', 'null': 'True', 'blank': 'True'}),
-            'updated_at': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
-        }
-    }
-
-    complete_apps = ['feeds']
+    operations = [
+        migrations.CreateModel(
+            name='Post',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('is_active', models.BooleanField(default=True)),
+                ('title', models.CharField(max_length=1024, null=True, blank=True)),
+                ('content', models.TextField(null=True, blank=True)),
+                ('author', models.CharField(max_length=64, null=True, blank=True)),
+                ('url', models.URLField(max_length=4096)),
+                ('url_hash', models.CharField(unique=True, max_length=64)),
+                ('captured_at', models.DateTimeField(auto_now_add=True)),
+            ],
+            options={
+                'ordering': ('-created_at',),
+            },
+        ),
+        migrations.CreateModel(
+            name='Site',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('is_active', models.BooleanField(default=True)),
+                ('url', models.URLField(null=True, blank=True)),
+                ('feed_url', models.URLField(unique=True)),
+                ('title', models.CharField(max_length=256, null=True, blank=True)),
+                ('feed_errors', models.IntegerField(default=0)),
+                ('last_update', models.DateTimeField()),
+                ('next_update', models.DateTimeField(db_index=True)),
+                ('task_id', models.CharField(default=b'', max_length=36, null=True, blank=True)),
+            ],
+            options={
+                'ordering': ('title',),
+            },
+        ),
+        migrations.AlterIndexTogether(
+            name='site',
+            index_together=set([('feed_errors', 'last_update')]),
+        ),
+        migrations.AddField(
+            model_name='post',
+            name='site',
+            field=models.ForeignKey(related_name='posts', to='feeds.Site'),
+        ),
+    ]

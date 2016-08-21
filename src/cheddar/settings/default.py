@@ -7,11 +7,11 @@ PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.
 
 CRAWLER_USER_AGENT = 'Cheddar Reader Crawler/1.0'
 CRAWLER_TIMEOUT = 30 # Avoid setting a high timeout, unless you can aford it
-CRAWLER_MAX_FEED_SIZE = 50*1024*1024 # Maximum size in bytes to read from a feed, this may lead to MemoryErrors when to much high 
+CRAWLER_MAX_FEED_SIZE = 50*1024*1024 # Maximum size in bytes to read from a feed, this may lead to MemoryErrors when to much high
 CRAWLER_MAX_FEED_SITE_SITE = 2*1024*1024 # Maximum site in bytes to read from a feed while adding feeds on the site
 
 MIN_UPDATE_INTERVAL_SECONDS = 600 # Updates at max 6 times per hour
-MIN_UPDATE_INTERVAL = timedelta(seconds=MIN_UPDATE_INTERVAL_SECONDS) 
+MIN_UPDATE_INTERVAL = timedelta(seconds=MIN_UPDATE_INTERVAL_SECONDS)
 MAX_UPDATE_INTERVAL_SECONDS = 12*3600 # Updates at last 2 times per day
 MAX_UPDATE_INTERVAL = timedelta(MAX_UPDATE_INTERVAL_SECONDS)
 MAX_UPDATE_WAIT = timedelta(seconds=3600) # After 1 hour without updates and supposedly running, force another one
@@ -22,7 +22,7 @@ CHEDDAR_HISTORY_SIZE = 20 # How much posts should be considered to calculate nex
 
 # Change this if you want bring caos into your instance
 CHEDDAR_DEFAULT_USER_ACTIVE_STATUS = False
-LOGIN_REDIRECT_URL = '/' 
+LOGIN_REDIRECT_URL = '/'
 
 
 DEBUG = True
@@ -34,7 +34,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', 
+        'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(PROJECT_ROOT, 'cheddar.db'),
         'USER': '',
         'PASSWORD': '',
@@ -153,6 +153,3 @@ CELERY_TASK_RESULT_EXPIRES = 10 # 10 seconds to expire the result
 CELERY_TRACK_STARTED = True
 CELERY_ACKS_LATE = False
 CELERY_SEND_EVENTS = True
-
-import djcelery
-djcelery.setup_loader()
