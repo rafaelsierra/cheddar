@@ -2,6 +2,21 @@
 # Django settings for cheddar project.
 import os
 from datetime import timedelta
+from kombu.serialization import register as kombu_register
+from feeds.serializers import feed_content_json_dumps, feed_content_json_loads
+
+kombu_register(
+    'feedcontentjson',
+    feed_content_json_dumps,
+    feed_content_json_loads,
+    content_type='application/x-feedcontent-json',
+    content_encoding='utf-8'
+)
+
+CELERY_ACCEPT_CONTENT = ['feedcontentjson', 'json']
+CELERY_TASK_SERIALIZER = 'feedcontentjson'
+CELERY_EVENT_SERIALIZER = 'feedcontentjson'
+CELERY_RESULT_SERIALIZER = 'feedcontentjson'
 
 PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
 

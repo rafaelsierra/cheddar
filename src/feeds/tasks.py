@@ -1,40 +1,48 @@
 # -*- coding: utf-8 -*-
-from celery.contrib import rdb
-from celery.utils.log import get_task_logger
-from django.conf import settings
-from django.core.cache import cache
-from django.db.utils import IntegrityError
-from django.utils import timezone
-from django.utils.timezone import make_aware, get_current_timezone
-from pytz.exceptions import AmbiguousTimeError
-import celery
 import datetime
-import feedparser
 import socket
 import time
 import urllib2
 
+import celery
+import feedparser
+from pytz.exceptions import AmbiguousTimeError
 
+from celery.utils.log import get_task_logger
+from django.conf import settings
+from django.db.utils import IntegrityError
+from django.utils import timezone
+from django.utils.timezone import make_aware, get_current_timezone
+
+from feeds.utils import build_request
 logger = get_task_logger(__name__)
+
 
 SITE_WORKER_CACHE_KEY = u'site-worker-{id}'
 CHECK_CACHE_KEY = 'check-sites-worker'
 
+
 @celery.task()
-def make_request(request):
-    '''Makes the request and returns a tuple (response.getcode(), 
-        response.info(), response.read())'''
+def make_request(url):
+    '''Open the URL and returns a tuple with:
+        (
+            response.getcode(),
+            response.info().dict, # response headers
+            response.read()
+        )
+    '''
+    request = build_request(url)
     try:
         response = urllib2.urlopen(request, timeout=settings.CRAWLER_TIMEOUT)
-    except (urllib2.HTTPError, urllib2.URLError, socket.timeout, socket.error), e:
+    except (urllib2.HTTPError, urllib2.URLError, socket.timeout, socket.error):
         logger.error('Failed trying to download {}'.format(request.get_full_url()))
         return -1, None, u''
-    
-    tup = response.getcode(), response.info(), response.read(settings.CRAWLER_MAX_FEED_SIZE)
+
+    tup = response.getcode(), response.info().dict, response.read(settings.CRAWLER_MAX_FEED_SIZE)
     response.close()
     return tup
-    
-    
+
+
 @celery.task()
 def parse_feed(rawdata):
     '''Parse the feed and returns whatever feedparser.parse returns'''
@@ -49,19 +57,20 @@ def parse_feed(rawdata):
 
 
 @celery.task()
-def update_site_feed(feed, site):
+def update_site_feed(feed, site_id):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
-    from feeds.models import Post
+    from feeds.models import Post, Site
     from feeds.utils import get_final_url
     from feeds.utils import get_sanitized_html
     # Avoids running two instances at the time
     # Update task_id for this site
+    site = Site.objects.get(id=site_id)
     site.task_id = update_site_feed.request.id
     site.save()
-    
+
     # Update this site info
-    if not 'feed' in feed:
+    if 'feed' not in feed:
         logger.warn(u"Site {} feed did not returned feed information".format(site.id))
         if 'feed_error' in feed:
             logger.error('Site {} is with its feed url broken'.format(site.id))
@@ -72,7 +81,7 @@ def update_site_feed(feed, site):
         info = feed['feed']
         if 'title' in info:
             site.title = info['title']
-            
+
         # For some reason, some Google Alerts returns a not valid FQDN info after parsed
         # and then we must check if it starts with "http"
         if 'link' in info and info['link'].startswith('http'):
@@ -82,17 +91,17 @@ def update_site_feed(feed, site):
         site.save()
 
     # Create posts
-    if not 'entries' in feed:
+    if 'entries' not in feed:
         logger.warn(u"Site {} feed did not returned any post".format(site.id))
     else:
         new_posts_found = 0
         for entry in feed['entries']:
             # Without link we can't save this post
-            if not 'link' in entry:
+            if 'link' not in entry:
                 continue
             url = get_final_url(entry['link'])
             title = entry.get('title', '')
-            
+
             # Try to get content
             if isinstance(entry.get('content'), list):
                 try:
@@ -103,30 +112,30 @@ def update_site_feed(feed, site):
                     content = u''
             else:
                 content = entry.get('content')
-                
+
             if not content and 'description' in entry:
                 content = entry['description']
-                
-                
+
             if isinstance(content, dict):
                 content = content.get('value')
             # Parses the content to avoid broken HTML and script tags
             content = get_sanitized_html(content)
-            
+
             author = entry.get('author')
-            
+
             if 'published_parsed' in entry and entry.get('published_parsed'):
                 created_at = datetime.datetime.fromtimestamp(time.mktime(entry['published_parsed']))
                 try:
                     created_at = make_aware(created_at, get_current_timezone())
-                except AmbiguousTimeError,e:
+                except AmbiguousTimeError:
                     logger.error('Failed when tring to make {} aware'.format(created_at))
                     created_at = timezone.now()
             else:
                 created_at = timezone.now()
-               
-            try: 
-                post, created = site.posts.get_or_create(url_hash=Post.hashurl(url),
+
+            try:
+                post, created = site.posts.get_or_create(
+                    url_hash=Post.hashurl(url),
                     defaults={
                         'title': title,
                         'url': url,
@@ -142,25 +151,30 @@ def update_site_feed(feed, site):
                     new_posts_found += 1
                 post.created_at = created_at
                 post.save()
-    
-        logger.info('Site {site_id} got {new} new posts from {total} in feed'.format(site_id=site.id, new=new_posts_found, total=len(feed['entries'])))
-        
+
+        logger.info(
+            'Site {site_id} got {new} new posts from {total} in feed'.format(
+                site_id=site.id,
+                new=new_posts_found,
+                total=len(feed['entries'])
+            )
+        )
+
     # Updates when is it to run again
     next_update = site.set_next_update(save=False)
     logger.info("Site's {} next update at {}".format(site.id, next_update))
     site.last_update = timezone.now()
     site.save()
 
-    
-    
+
 @celery.task()
 def check_sites_for_update():
-    '''Check if site's crawler should run'''    
+    '''Check if site's crawler should run'''
     from feeds.models import Site
     sites = Site.objects.need_update()
-        
+
     logger.info(u"There are {} sites that needs update".format(sites.count()))
-    
+
     for site in sites:
         # Checks if this site was put to run recently
         if not site.task or site.task.status in (u'SUCCESS', u'FAILURE', u'REVOKED'):
@@ -170,12 +184,9 @@ def check_sites_for_update():
             site.update_feed()
         else:
             logger.warn('Tried to start another task for site {} but status is {}'.format(site.id, site.task.status))
-            if site.last_update < timezone.now()-settings.MAX_UPDATE_WAIT:
+            if site.last_update < (timezone.now() - settings.MAX_UPDATE_WAIT):
                 logger.error('Site {} has been running for more time than allowed, revoking task to start another next time'.format(site.id))
                 # Revoke site's task and clear its task_id
                 site.task.revoke()
                 site.task_id = None
                 site.save()
-    
-    
-    

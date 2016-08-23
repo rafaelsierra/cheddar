@@ -12,11 +12,6 @@ ALLOWED_HOST = ['*']
 DEBUG = bool(os.environ.get('DEBUG', False))
 TEMPLATE_DEBUG = DEBUG
 
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_EVENT_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',

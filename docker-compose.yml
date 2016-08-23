@@ -58,7 +58,7 @@ services:
 
   cheddar-worker:
     extends: cheddar
-    command: "python manage.py celery worker -l INFO --autoscale=10,1"
+    command: "python manage.py celery worker -Q make_request,parse_feed,update_site_feed,celery -l INFO --autoscale=10,1"
     links:
       - redis
       - memcached
