@@ -3,15 +3,6 @@ NOTE:
 
 If you are good at writing tests, you are more than welcome to help!
 
-WIP:
-====
-
-This branch is Dockerizing the whole Cheddar environment (DB, Caching, Celery, etc), hence some
-things are not working, such as the communication between workers that were done using Pickle
-but are now moving to JSON, but they are still sending messages with full Python objects.
-
-So, please be patient that in the next weeks everything will be working fine.
-
 
 cheddar
 =======
