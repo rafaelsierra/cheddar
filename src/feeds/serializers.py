@@ -13,9 +13,6 @@ class FeedContentEncoder(json.JSONEncoder):
         else:
             return json.FeedContentEncoder.default(self, obj)
 
-        if isinstance(obj, unicode):
-            return obj.encode('utf-8')
-
 
 def decode_feed_content(obj):
     if isinstance(obj, types.DictionaryType) and '__type__' in obj:
