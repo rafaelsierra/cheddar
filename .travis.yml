@@ -3,8 +3,9 @@ python:
   - "2.7"
 
 env:
-  - DJANGO_SETTINGS_MODULE=cheddar.settings.tests
-  - PYTHONPATH=src
+  global:
+    - DJANGO_SETTINGS_MODULE=cheddar.settings.tests
+    - PYTHONPATH=src
 
 before_install:
   - sudo apt-get update -qq
