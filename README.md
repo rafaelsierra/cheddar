@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/rafaelsierra/cheddar.svg?branch=master)](https://travis-ci.org/rafaelsierra/cheddar)
+
 NOTE:
 =====
 
