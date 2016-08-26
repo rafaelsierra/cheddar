@@ -163,7 +163,7 @@ class Post(BaseModel):
 
     @classmethod
     def hashurl(cls, url):
-        return hashlib.sha256(url).hexdigest()
+        return hashlib.sha256(url.encode('utf-8')).hexdigest()
 
     def save(self, *args, **kwargs):
         # Sets uniqueness of this post

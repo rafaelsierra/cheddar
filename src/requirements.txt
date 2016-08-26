@@ -2,8 +2,8 @@ beautifulsoup4
 celery[redis]
 coverage
 django==1.8.9
+djangorestframework
 django-celery>=3.1.17
-django-extensions
 django-nose
 feedparser
 flower
@@ -11,10 +11,8 @@ gunicorn
 ipdb
 ipython
 listparser
+markdown
 psycopg2
 python-memcached
 requests
 responses
-sierra-django-json-mixin-form
-
-git+https://github.com/rafaelsierra/django-metadata.git

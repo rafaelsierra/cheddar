@@ -33,12 +33,12 @@ def make_request(url):
     This function is basically a celery task for the download utility
     '''
     try:
-        response = download(url, timeout=settings.CRAWLER_TIMEOUT)
+        response = download(url)
     except (requests.ConnectionError, requests.HTTPError):
         logger.error('Failed trying to download {}'.format(response['url']))
-        return -1, None, u''
+        return -1, None, ''
 
-    return response['status_code'], response['headers'], response['text']
+    return [response['status_code'], dict(response['headers']), response['text']]
 
 
 @celery.task()
