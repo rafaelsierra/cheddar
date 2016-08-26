@@ -9,3 +9,4 @@ build
 local_settings.py
 localenv.sh
 *.swp
+.coverage

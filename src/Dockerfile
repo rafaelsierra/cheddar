@@ -1,4 +1,4 @@
-FROM python:2.7
+FROM python:3.5
 MAINTAINER rafaeljsg14@gmail.com
 
 COPY requirements.txt /opt/cheddar/

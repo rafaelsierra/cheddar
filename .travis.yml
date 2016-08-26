@@ -15,4 +15,6 @@ install:
   - pip install -r src/requirements.txt
 
 script:
-  - python src/manage.py test
+  - cd src/
+  - coverage run manage.py test
+  - coverage report --include=feeds*,cheddar*,accounts* -m --omit=*migrations*

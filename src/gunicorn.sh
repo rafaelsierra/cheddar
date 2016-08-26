@@ -11,7 +11,7 @@ gunicorn -b 0.0.0.0:8000 \
     --keep-alive=3 \
     --max-requests=1000 \
     --max-requests-jitter=50 \
-    --access-logfile=/dev/stdout \
-    --error-logfile=/dev/stdout \
+    --access-logfile=- \
+    --error-logfile=- \
     --capture-output \
-    cheddar.wsgi:application
+    cheddar.wsgi:application 2>&1
