@@ -17,4 +17,4 @@ install:
 script:
   - cd src/
   - coverage run manage.py test
-  - coverage report --include=feeds*,cheddar*,accounts* -m --omit=*migrations*
+  - coverage report --include=feeds*,cheddar*,accounts* -m --omit=*migrations*,*unittests*

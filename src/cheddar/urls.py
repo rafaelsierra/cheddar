@@ -5,9 +5,12 @@ from django.contrib import admin
 
 from rest_framework import routers
 
+from accounts import views as accounts_view
+
 admin.autodiscover()
 
-router = routers.DefaultRouter()
+router = routers.DefaultRouter(trailing_slash=False)
+router.register('account', accounts_view.AccountViewSet, base_name='account')
 
 urlpatterns = patterns(
     '',
