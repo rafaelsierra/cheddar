@@ -16,11 +16,6 @@ class NewAccountSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email', 'password')
 
-    def validate_username(self, value):
-        if User.objects.filter(username=value.lower()).count() > 0:
-            raise serializers.ValidationError('Username not available')
-        return value
-
     def validate_email(self, value):
         if User.objects.filter(email=value.lower()).count() > 0:
             raise serializers.ValidationError('E-mail not available')

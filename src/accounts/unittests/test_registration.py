@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
-from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
+
 
 class RegistrationTestCase(APITestCase):
     def setUp(self):
@@ -8,6 +8,9 @@ class RegistrationTestCase(APITestCase):
         self.user = User(username='sdm', is_active=True)
         self.user.set_password('1234')
         self.user.save()
+
+    def tearDown(self):
+        self.user.delete()
 
     def test_anonymous_user_trying_to_GET(self):
         response = self.client.get(self.url)
@@ -51,4 +54,28 @@ class RegistrationTestCase(APITestCase):
             list(response.data.keys()),
             ['username', 'email', 'first_name', 'last_name', 'last_login', 'date_joined']
         )
+        self.assertEqual(User.objects.get(username='foo').email, 'foo@bar.xxx')
 
+    def test_username_not_available(self):
+        response = self.client.post(
+            self.url,
+            {
+                'username': self.user.username,
+                'password': 'something else',
+                'email': 'doesnt.matter@cheddr.net',
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('username', response.data)
+
+    def test_email_not_available(self):
+        response = self.client.post(
+            self.url,
+            {
+                'username': 'username',
+                'password': 'another password',
+                'email': self.user.email,
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('email', response.data)

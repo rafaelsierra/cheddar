@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from rest_framework.compat import is_authenticated
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.response import Response
+from rest_framework.authtoken.views import ObtainAuthToken
 
 from .serializers import AccountSerializer, NewAccountSerializer
 
@@ -23,3 +24,10 @@ class AccountViewSet(viewsets.ViewSet):
         if serializer.is_valid(raise_exception=True):
             user = serializer.save()
             return Response(AccountSerializer(user).data, status=201)
+
+
+class AuthenticateView(ObtainAuthToken):
+    """
+    Creates a new Token and invalidates the old one
+    """
+    throttle_scope = 'login'

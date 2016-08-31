@@ -2,16 +2,6 @@
 # Django settings for cheddar project.
 import os
 from datetime import timedelta
-from kombu.serialization import register as kombu_register
-from feeds.serializers import feed_content_json_dumps, feed_content_json_loads
-
-#kombu_register(
-#    'json',
-#    feed_content_json_dumps,
-#    feed_content_json_loads,
-#    content_type='application/x-feedcontent-json',
-#    content_encoding='utf-8'
-#)
 
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -116,14 +106,16 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = ("django.contrib.auth.context_processors.auth",
-"django.core.context_processors.debug",
-"django.core.context_processors.i18n",
-"django.core.context_processors.media",
-"django.core.context_processors.static",
-"django.core.context_processors.tz",
-"django.contrib.messages.context_processors.messages",
-"django.core.context_processors.request")
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "django.core.context_processors.request"
+)
 
 LOGGING = {
     'version': 1,
@@ -181,10 +173,12 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle'
+        'rest_framework.throttling.ScopedRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
         'anon': '50/day',
-        'user': '100/second'
+        'user': '100/second',
+        'login': '30/minute',
     }
 }
