@@ -50,6 +50,7 @@ class UserSite(BaseModel):
     site = models.ForeignKey(Site, related_name='usersite')
     folder = models.ForeignKey(Folder, null=True, blank=True, related_name='usersite')
 
+    objects = BaseModelManager()
     posts = UserSitePostsManager()
 
     class Meta:

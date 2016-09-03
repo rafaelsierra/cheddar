@@ -2,7 +2,10 @@ import datetime
 import json
 import logging
 import time
-import types
+
+from rest_framework import serializers
+
+from .models import Site
 
 logger = logging.getLogger('feeds.serializers')
 
@@ -32,6 +35,13 @@ def feed_content_json_loads(obj):
     if isinstance(obj, str):
         return json.loads(obj, object_hook=decode_feed_content)
     elif isinstance(obj, bytes):
-        return feed_content_json_loads(obj.decode('utf-8')) 
+        return feed_content_json_loads(obj.decode('utf-8'))
     else:
         logger.error('Received some weird content to decode: {!r}'.format(obj))
+
+
+class SiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Site
+        fields = ('id', 'url', 'feed_url', 'title', 'last_update', 'posts')
+        read_only_fields = ('id', 'url', 'title', 'last_update', 'posts')

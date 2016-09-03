@@ -68,11 +68,11 @@ class Site(BaseModel):
             return None
         return update_site_feed.AsyncResult(self.task_id)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.title:
             return self.title
         else:
-            return unicode(self.id)
+            return str(self.id)
 
     def clean(self):
         # TODO: check if feed_url is a valid feed
