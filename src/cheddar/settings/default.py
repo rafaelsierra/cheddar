@@ -130,6 +130,10 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'stdout': {
+            'level': 'WARN',
+            'class': 'logging.StreamHandler',
         }
     },
     'loggers': {
@@ -138,6 +142,9 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        '':{
+            'handlers': ['stdout'],
+        }
     }
 }
 
