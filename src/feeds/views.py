@@ -55,7 +55,7 @@ class SiteViewSet(viewsets.ModelViewSet):
                         'next_update': timezone.now()
                     }
                 )
-        except IntegrityError:
+        except IntegrityError: # pragma: no cover
             raise exceptions.APIException()
         else:
             self.request.user.my_sites.get_or_create(site=site)
@@ -64,9 +64,5 @@ class SiteViewSet(viewsets.ModelViewSet):
                 site.update_feed()
 
     def perform_destroy(self, instance):
-        try:
-            my_site = self.request.user.my_sites.get(site=instance)
-        except Site.DoesNotExist:
-            raise exceptions.NotFound()
-        else:
-            my_site.delete()
+        my_site = self.request.user.my_sites.get(site=instance)
+        my_site.delete()

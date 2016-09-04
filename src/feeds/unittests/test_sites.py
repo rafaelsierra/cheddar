@@ -124,3 +124,7 @@ class SitesTestCase(APITestCase):
             status=405
         )
         self.assertEqual(response.status_code, 405)
+
+    def test_unsubscribe_from_not_subscribed(self):
+        response = self.client.delete('/v1/feeds/sites/4', status=404)
+        self.assertEqual(response.status_code, 404)
