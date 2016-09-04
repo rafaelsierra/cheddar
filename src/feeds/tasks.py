@@ -35,7 +35,7 @@ def make_request(url):
     try:
         response = download(url)
     except (requests.ConnectionError, requests.HTTPError):
-        logger.error('Failed trying to download {}'.format(response['url']))
+        logger.error('Failed trying to download {}'.format('url'))
         return -1, None, ''
 
     return [response['status_code'], dict(response['headers']), response['text']]

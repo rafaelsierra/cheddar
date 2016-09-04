@@ -4,6 +4,7 @@ import logging
 import time
 
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from .models import Site
 
@@ -41,7 +42,16 @@ def feed_content_json_loads(obj):
 
 
 class SiteSerializer(serializers.ModelSerializer):
+    resource_url = serializers.SerializerMethodField()
+
+    def get_resource_url(self, obj):
+        return reverse('sites-detail', kwargs={'pk': obj.id})
+
     class Meta:
         model = Site
-        fields = ('id', 'url', 'feed_url', 'title', 'last_update', 'posts')
-        read_only_fields = ('id', 'url', 'title', 'last_update', 'posts')
+        fields = ('id', 'resource_url', 'url', 'feed_url', 'title', 'last_update')
+        read_only_fields = ('id', 'url', 'title', 'last_update', 'resource_url')
+
+
+class SiteAddSerializer(serializers.Serializer):
+    feed_url = serializers.URLField()

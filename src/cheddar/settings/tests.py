@@ -3,6 +3,7 @@
 from .default import *  # NOQA
 import djcelery
 
+
 USE_X_FORWARDED_HOST = True
 ALLOWED_HOST = ['*']
 
@@ -17,5 +18,7 @@ DATABASES = {
 }
 
 SECRET_KEY = 'something to test'
+
+TEST_RUNNER = 'djcelery.contrib.test_runner.CeleryTestSuiteRunner'
 
 djcelery.setup_loader()

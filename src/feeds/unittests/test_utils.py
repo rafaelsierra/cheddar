@@ -70,4 +70,3 @@ class GetSatanizedHtmlTestCase(unittest.TestCase):
         ugly_html = """<script>rm -Rf /</script><style>color: black</style>Oh"""
         pretty_html = get_sanitized_html(ugly_html)
         self.assertEqual(pretty_html, """Oh\n""")
-

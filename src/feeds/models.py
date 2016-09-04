@@ -12,8 +12,6 @@ import base64
 import datetime
 import hashlib
 import logging
-from django.core.exceptions import ValidationError
-
 
 logger = logging.getLogger('feeds.tasks')
 
@@ -91,12 +89,8 @@ class Site(BaseModel):
 
     def save(self, *args, **kwargs):
         '''Force model validation'''
-        try:
-            self.full_clean()
-        except ValidationError:
-            logger.exception('Validation error')
-        else:
-            super(Site, self).save(*args, **kwargs)
+        self.full_clean()
+        super(Site, self).save(*args, **kwargs)
 
     def set_next_update(self, save=True):
         '''
