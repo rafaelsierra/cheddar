@@ -9,7 +9,7 @@ from rest_framework import exceptions
 from rest_framework import status
 from rest_framework.response import Response
 
-from .serializers import SiteSerializer, SiteAddSerializer, PostSerializer
+from .serializers import SiteSerializer, SiteAddSerializer, PostSerializer, PostPatchSerializer
 from .models import Site, Post
 
 DEFAULT_FAVICON = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAABtklE\nQVQ4y43TTUvUURQG8N/1ZUAKy2qjEEgUFC2KNpUbtyFueiEpGRsp6AO06FPkvhepxqaQioKJthGB\n0SZqESiFCJWrUINK+s/YbXHHGcmpvHA5z+Ge8/Cc594bYoyUQlEwhJyNrUw0aTiOhHhHUZCXIaCl\ntsN/KCKCiRBLfsrkFCLVbyy+Yf4p76+yvEDrP0myEEuiDIW4vuDTY16Oki39VVEigAo2dbGjj95h\nes80ql6cYu5hUzUNglUPVovaO+grsfN4yl9f4t3YOpKWenMhcvozR6/TuZvKMs9O8OpCqjx0hd6T\nxGYKmnkwe5upQsJ7znP4RsL3u6gs/aEgh2KgvJfpsXSy6xyDbxOeGefjo4SP3GSlmQcR1Vrc0s3g\nNO2dzN5iajR5MvQjdT3YTrawRkFEzzHyFUYqbD3Ak301JYWGJ3P3aiNdrHuRCKroLxNa0+4v83W+\nMc7+yynOlVLsHuDXWoKmLwQfriXcM5Dm/jKV8m0H1xBEmTY8HySuEKsJt2FhJlV19CTJ3xdT3rY5\n5bWnXBTl66OQmkP936nf1Pp8IsQYuRuKoiFhg985ygSTzsaR3435oAsmcnGfAAAAAElFTkSuQmCC\n'
@@ -73,13 +73,28 @@ class PostsViewSet(viewsets.ModelViewSet):
     ViewSet to read posts
     """
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = PostSerializer
 
-    def update(self, *args, **kwargs):
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return PostSerializer
+        elif self.request.method in ('PATCH', 'PUT'):
+            return PostPatchSerializer
+
+    def destroy(self, *args, **kwargs):
         raise exceptions.MethodNotAllowed(self.request.method)
-    create = destroy = partial_update = update
+    create = destroy
+
+    def perform_update(self, serializer):
+        post = self.get_object()
+        userpost = post.userpost.get_or_create(user=self.request.user)[0]
+        for key, value in serializer.validated_data.items():
+            setattr(userpost, key, value)
+        userpost.save()
 
     def get_queryset(self):
-        return Post.objects.filter(site__usersite__user=self.request.user).select_related(
+        queryset = Post.objects.filter(site__usersite__user=self.request.user).select_related(
             'site',
         )
+        if self.request.GET.get('order', 'asc').lower() == 'asc':
+            return queryset.order_by('captured_at')
+        return queryset.order_by('-captured_at')

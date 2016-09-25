@@ -66,10 +66,6 @@ class PostsTestCase(APITestCase):
         Post.objects.all().delete()
         Site.objects.all().delete()
 
-    def test_post_indexing(self):
-        # Subscribe to a new site
-        self.assertEqual(Post.objects.filter(site__feed_url=self.feed_url).count(), 1)
-
     def test_list_all_posts(self):
         response = self.client.get('/v1/feeds/posts')
         self.assertEqual(response.status_code, 200)
@@ -85,3 +81,37 @@ class PostsTestCase(APITestCase):
         self.assertFalse(post['is_starred'])
         site = self.client.get(post['site'])
         self.assertEqual(site.data['title'], 'RSS Title')
+
+    def test_patch_post(self):
+        # Marks a post as read
+        response = self.client.get('/v1/feeds/posts')
+        post = response.data['results'][0]
+        response = self.client.patch(
+            post['resource_url'],
+            {'is_read': True}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Stars the post
+        response = self.client.patch(
+            post['resource_url'],
+            {'is_starred': True}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Checks if the changes were saved
+        response = self.client.get(post['resource_url'])
+        self.assertTrue(response.data['is_read'])
+        self.assertTrue(response.data['is_starred'])
+        self.assertFalse(response.data['is_shared'])
+
+        # Marks the post as unread
+        response = self.client.patch(
+            post['resource_url'],
+            {'is_read': False}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Checks if the changes were saved
+        response = self.client.get(post['resource_url'])
+        self.assertFalse(response.data['is_read'])

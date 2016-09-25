@@ -99,3 +99,9 @@ class PostSerializer(serializers.ModelSerializer):
             'is_starred',
             'is_shared',
         )
+
+
+class PostPatchSerializer(serializers.Serializer):
+    is_read = serializers.BooleanField(required=False)
+    is_shared = serializers.BooleanField(required=False)
+    is_starred = serializers.BooleanField(required=False)
