@@ -77,6 +77,11 @@ class PostsTestCase(APITestCase):
         # There should be 2 posts on database and 1 on the API
         self.assertEqual(Post.objects.count(), 2)
         self.assertEqual(len(response.data['results']), 1)
-        self.assertFalse(response.data['results'][0]['is_read'])
-        self.assertFalse(response.data['results'][0]['is_shared'])
-        self.assertFalse(response.data['results'][0]['is_starred'])
+
+        # Checks post data
+        post = response.data['results'][0]
+        self.assertFalse(post['is_read'])
+        self.assertFalse(post['is_shared'])
+        self.assertFalse(post['is_starred'])
+        site = self.client.get(post['site'])
+        self.assertEqual(site.data['title'], 'RSS Title')

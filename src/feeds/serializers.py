@@ -63,6 +63,7 @@ class PostSerializer(serializers.ModelSerializer):
     is_starred = serializers.SerializerMethodField()
     is_shared = serializers.SerializerMethodField()
     date = serializers.DateTimeField(source='captured_at')
+    site = serializers.HyperlinkedRelatedField(read_only=True, view_name='sites-detail')
 
     userpost = None
 
