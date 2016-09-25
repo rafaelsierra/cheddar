@@ -62,7 +62,7 @@ class SitesTestCase(APITestCase):
 
         # Checks if it is going to return on the list
         response = self.client.get('/v1/feeds/sites')
-        self.assertEqual(response.data[0]['feed_url'], self.feed_url)
+        self.assertEqual(response.data['results'][0]['feed_url'], self.feed_url)
 
     @responses.activate
     def test_subscribe_to_existing_site(self):
@@ -78,7 +78,7 @@ class SitesTestCase(APITestCase):
 
         # Checks if it is going to return on the list
         response = self.client.get('/v1/feeds/sites')
-        self.assertEqual(response.data[0]['feed_url'], self.feed_url)
+        self.assertEqual(response.data['results'][0]['feed_url'], self.feed_url)
 
     @responses.activate
     def test_unsubscribe_from_site(self):
@@ -97,7 +97,7 @@ class SitesTestCase(APITestCase):
 
         # It should not return in this list
         response = self.client.get('/v1/feeds/sites')
-        self.assertEqual(response.data, [])
+        self.assertEqual(response.data['results'], [])
 
         # The site itself must remain
         self.assertEqual(Site.objects.get(id=site_id).id, site_id)

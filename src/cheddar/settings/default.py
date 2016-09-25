@@ -142,7 +142,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        '':{
+        '': {
             'handlers': ['stdout'],
         }
     }
@@ -187,5 +187,7 @@ REST_FRAMEWORK = {
         'anon': '50/day',
         'user': '100/second',
         'login': '30/minute',
-    }
+    },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
 }

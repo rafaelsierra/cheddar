@@ -46,8 +46,9 @@ def parse_feed(rawdata):
     '''Parse the feed and returns whatever feedparser.parse returns'''
     if rawdata[0] < 0:
         # Error downloading feed
+        logger.error('Cannot parse feed because HTTP status code is invalid')
         return {'feed_error': True}
-    result = feedparser.parse(rawdata[2])
+    result = feedparser.parse(rawdata[2].strip())
     if result.bozo > 0 and not result.entries:
         return {'feed_error': True}
     else:

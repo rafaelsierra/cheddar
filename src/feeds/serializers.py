@@ -6,7 +6,7 @@ import time
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
-from .models import Site
+from .models import Site, Post
 
 logger = logging.getLogger('feeds.serializers')
 
@@ -55,3 +55,46 @@ class SiteSerializer(serializers.ModelSerializer):
 
 class SiteAddSerializer(serializers.Serializer):
     feed_url = serializers.URLField()
+
+
+class PostSerializer(serializers.ModelSerializer):
+    resource_url = serializers.SerializerMethodField()
+    is_read = serializers.SerializerMethodField()
+    is_starred = serializers.SerializerMethodField()
+    is_shared = serializers.SerializerMethodField()
+    date = serializers.DateTimeField(source='captured_at')
+
+    userpost = None
+
+    def get_resource_url(self, obj):
+        return reverse('posts-detail', kwargs={'pk': obj.id})
+
+    def get_userpost(self, obj):
+        # TODO: Stop hitting database for each post
+        if not self.userpost:
+            self.userpost = obj.userpost.get_or_create(user=self.context['request'].user)[0]
+        return self.userpost
+
+    def get_is_read(self, obj):
+        return self.get_userpost(obj).is_read
+
+    def get_is_starred(self, obj):
+        return self.get_userpost(obj).is_starred
+
+    def get_is_shared(self, obj):
+        return self.get_userpost(obj).is_shared
+
+    class Meta:
+        model = Post
+        fields = (
+            'id',
+            'resource_url',
+            'site',
+            'title',
+            'content',
+            'author',
+            'is_read',
+            'date',
+            'is_starred',
+            'is_shared',
+        )

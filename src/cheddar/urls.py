@@ -13,6 +13,7 @@ admin.autodiscover()
 router = routers.DefaultRouter(trailing_slash=False)
 router.register('account', accounts_view.AccountViewSet, base_name='account')
 router.register('feeds/sites', feeds_view.SiteViewSet, base_name='sites')
+router.register('feeds/posts', feeds_view.PostsViewSet, base_name='posts')
 
 urlpatterns = patterns(
     '',
