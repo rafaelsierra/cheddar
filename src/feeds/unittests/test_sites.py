@@ -128,3 +128,15 @@ class SitesTestCase(APITestCase):
     def test_unsubscribe_from_not_subscribed(self):
         response = self.client.delete('/v1/feeds/sites/4', status=404)
         self.assertEqual(response.status_code, 404)
+
+    def test_string_coercion(self):
+        site = Site(feed_url='http://cheddr.net')
+        self.assertEqual(str(site), 'http://cheddr.net')
+        site.title = 'Cheddar Reader'
+        self.assertEqual(str(site), 'Cheddar Reader')
+
+
+    def test_model_clean(self):
+        site = Site(feed_url='http://cheddr.net')
+        site.clean()
+        self.assertTrue(site.next_update is not None)
