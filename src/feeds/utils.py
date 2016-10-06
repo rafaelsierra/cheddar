@@ -59,9 +59,18 @@ def get_sanitized_html(html):
         return html
 
     bs = BeautifulSoup(html, 'html.parser')
-    for tag in ('script', 'style'):
-        for item in bs.findAll(tag):
-            item.extract()
+    for tag in bs.find_all():
+        if tag.name in ('script', 'style', 'iframe', 'frame', 'frameset'):
+            tag.extract()
+            continue
+        for attr, value in list(tag.attrs.items()):
+            if tag.name == 'a' and attr == 'href':
+                continue
+            if tag.name == 'img' and attr == 'src':
+                continue
+            if tag.name == 'video' and attr == 'src':
+                continue
+            del tag[attr]
     html = bs.prettify()
 
     return html
