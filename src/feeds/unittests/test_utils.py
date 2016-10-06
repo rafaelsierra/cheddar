@@ -66,7 +66,15 @@ class GetSatanizedHtmlTestCase(unittest.TestCase):
         pretty_html = get_sanitized_html(ugly_html)
         self.assertEqual(pretty_html, """<p>\n Hello\n <b>\n  world!\n </b>\n</p>""")
 
-    def test_sanitized_html(self):
-        ugly_html = """<script>rm -Rf /</script><style>color: black</style>Oh"""
+    def test_evil_html(self):
+        ugly_html = (
+            """<script>rm -Rf /</script><style>color: black</style><b onclick="doEvil()">"""
+            """Oh</b><iframe src="ops"><frame><frameset>"""
+        )
         pretty_html = get_sanitized_html(ugly_html)
-        self.assertEqual(pretty_html, """Oh\n""")
+        self.assertEqual(pretty_html, """<b>\n Oh\n</b>""")
+
+    def test_safe_attrs(self):
+        ugly_html = """<a href="bla">Hi <i>italic</i></a><img src="ble" onload="muahaha()">"""
+        pretty_html = get_sanitized_html(ugly_html)
+        self.assertEqual(pretty_html, """<a href="bla">\n Hi\n <i>\n  italic\n </i>\n</a>\n<img src="ble"/>\n""")
