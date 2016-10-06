@@ -12,8 +12,6 @@ import base64
 import datetime
 import hashlib
 import logging
-from django.core.exceptions import ValidationError
-
 
 logger = logging.getLogger('feeds.tasks')
 
@@ -57,26 +55,21 @@ class Site(BaseModel):
             ['feed_errors', 'last_update'],
         ]
 
-    def display_title(self):
-        '''Return the site title or its feed url'''
-        return self.title if self.title else self.feed_url
-
     @property
-    def task(self):
+    def task(self): # pragma: no cover
         '''Returns the current task running this site'''
         if not self.task_id:
             return None
         return update_site_feed.AsyncResult(self.task_id)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.title:
             return self.title
         else:
-            return unicode(self.id)
+            return str(self.feed_url)
 
     def clean(self):
         # TODO: check if feed_url is a valid feed
-
         # next_update must be editable
         if not self.next_update:
             self.next_update = timezone.now() - datetime.timedelta(hours=24)
@@ -91,12 +84,8 @@ class Site(BaseModel):
 
     def save(self, *args, **kwargs):
         '''Force model validation'''
-        try:
-            self.full_clean()
-        except ValidationError:
-            logger.exception('Validation error')
-        else:
-            super(Site, self).save(*args, **kwargs)
+        self.full_clean()
+        super(Site, self).save(*args, **kwargs)
 
     def set_next_update(self, save=True):
         '''
@@ -105,7 +94,7 @@ class Site(BaseModel):
         This is a pretty simple function to calculate the average seconds between
         posts.
         '''
-        if self.feed_errors > settings.MAX_FEED_ERRORS_ALLOWED:
+        if self.feed_errors > settings.MAX_FEED_ERRORS_ALLOWED: # pragma: no cover
             # if this site is returning to much errors, just set it for the max
             # time allowed
             eta = settings.MAX_UPDATE_INTERVAL_SECONDS
@@ -163,7 +152,7 @@ class Post(BaseModel):
 
     @classmethod
     def hashurl(cls, url):
-        return hashlib.sha256(url).hexdigest()
+        return hashlib.sha256(url.encode('utf-8')).hexdigest()
 
     def save(self, *args, **kwargs):
         # Sets uniqueness of this post

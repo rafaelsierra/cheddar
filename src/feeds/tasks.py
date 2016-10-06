@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
+import requests
 import datetime
-import socket
 import time
-import urllib2
 
 import celery
 import feedparser
@@ -14,7 +13,7 @@ from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.utils.timezone import make_aware, get_current_timezone
 
-from feeds.utils import build_request
+from feeds.utils import download
 logger = get_task_logger(__name__)
 
 
@@ -26,21 +25,20 @@ CHECK_CACHE_KEY = 'check-sites-worker'
 def make_request(url):
     '''Open the URL and returns a tuple with:
         (
-            response.getcode(),
-            response.info().dict, # response headers
-            response.read()
+            status_code
+            headers,
+            text
         )
-    '''
-    request = build_request(url)
-    try:
-        response = urllib2.urlopen(request, timeout=settings.CRAWLER_TIMEOUT)
-    except (urllib2.HTTPError, urllib2.URLError, socket.timeout, socket.error):
-        logger.error('Failed trying to download {}'.format(request.get_full_url()))
-        return -1, None, u''
 
-    tup = response.getcode(), response.info().dict, response.read(settings.CRAWLER_MAX_FEED_SIZE)
-    response.close()
-    return tup
+    This function is basically a celery task for the download utility
+    '''
+    try:
+        response = download(url)
+    except (requests.ConnectionError, requests.HTTPError):
+        logger.error('Failed trying to download {}'.format('url'))
+        return -1, None, ''
+
+    return [response['status_code'], dict(response['headers']), response['text']]
 
 
 @celery.task()
@@ -48,8 +46,9 @@ def parse_feed(rawdata):
     '''Parse the feed and returns whatever feedparser.parse returns'''
     if rawdata[0] < 0:
         # Error downloading feed
+        logger.error('Cannot parse feed because HTTP status code is invalid')
         return {'feed_error': True}
-    result = feedparser.parse(rawdata[2])
+    result = feedparser.parse(rawdata[2].strip())
     if result.bozo > 0 and not result.entries:
         return {'feed_error': True}
     else:

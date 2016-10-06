@@ -1,17 +1,31 @@
 # -*- coding: utf-8 -*-
-import urllib2
+import requests
 from django.conf import settings
-import socket
 import logging
-import sgmllib
 from bs4 import BeautifulSoup
 
 
-def build_request(url):
-    '''Returns a urllib2.Request instance to urlopen'''
-    request = urllib2.Request(url)
-    request.add_header('User-Agent', settings.CRAWLER_USER_AGENT)
-    return request
+def download(url):
+    '''Returns a JSON serializable dictionary with the following keys:
+        - status_code
+        - text
+        - headers
+        - url
+    '''
+    with requests.Session() as session:
+        session.max_redirects = settings.MAX_FINAL_URL_TRIES
+
+        response = session.get(
+            url,
+            headers={'user-agent': settings.CRAWLER_USER_AGENT},
+            timeout=settings.CRAWLER_TIMEOUT
+        )
+        return {
+            'status_code': response.status_code,
+            'text': response.text,
+            'headers': response.headers,
+            'url': response.url
+        }
 
 
 def get_final_url(url, times_left=settings.MAX_FINAL_URL_TRIES):
@@ -23,31 +37,25 @@ def get_final_url(url, times_left=settings.MAX_FINAL_URL_TRIES):
 
     logging.debug(u'Checking final URL for {!r}'.format(url))
     try:
-        post = urllib2.urlopen(
-            build_request(url),
-            timeout=settings.CRAWLER_TIMEOUT
-        )
-    except (urllib2.URLError, urllib2.HTTPError, socket.error, socket.timeout):
+        post = download(url)
+    except (requests.ConnectionError, requests.HTTPError):
         logging.error(u'Failed trying to download {!r}'.format(url))
         return url
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        logging.error(u'urllib2 failed to download due to encoding in the URL\'s content: {!r}'.format(url))
-        return url
 
-    if url != post.geturl():
-        logging.info(u'Final URL for {!r} diverges from {!r}'.format(url, post.geturl()))
+    if url != post['url']:
+        logging.info(u'Final URL for {!r} diverges from {!r}'.format(url, post['url']))
         # Try again until find a final URL (or tire out)
-        return get_final_url(post.geturl(), times_left - 1)
+        return get_final_url(post['url'], times_left - 1)
     else:
         logging.debug(u'Post URL {!r} checked OK'.format(url))
 
-    return post.geturl()
+    return post['url']
 
 
 def get_sanitized_html(html):
     '''Fixes DOM and remove crap tags'''
     # html must be some kind of string
-    if not isinstance(html, basestring):
+    if not isinstance(html, str):
         return html
 
     bs = BeautifulSoup(html, 'html.parser')
@@ -59,16 +67,11 @@ def get_sanitized_html(html):
     return html
 
 
-class FindLinkToFeedParser(sgmllib.SGMLParser):
-    '''Class to parse HTML content and get links to feeds'''
-    feed_url = None
-
-    def start_link(self, attributes):
-        data = {'rel': None, 'type': None, 'href': None}
-        content_types = ['application/rss+xml', 'application/atom+xml', 'application/rdf+xml']
-        for att in attributes:
-            if att[0] in data:
-                data[att[0]] = att[1]
-
-        if data['type'] in content_types:
-            self.feed_url = data['href']
+def find_link_to_feed(html):
+    '''Parses HTML and returns <link>s to feeds'''
+    soup = BeautifulSoup(html, 'html.parser')
+    content_types = ['application/rss+xml', 'application/atom+xml', 'application/rdf+xml']
+    links = soup.find_all('link')
+    for link in links:
+        if link.get('type', '').lower().strip() in content_types:
+            return link.get('href')

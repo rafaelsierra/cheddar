@@ -2,21 +2,11 @@
 # Django settings for cheddar project.
 import os
 from datetime import timedelta
-from kombu.serialization import register as kombu_register
-from feeds.serializers import feed_content_json_dumps, feed_content_json_loads
 
-kombu_register(
-    'feedcontentjson',
-    feed_content_json_dumps,
-    feed_content_json_loads,
-    content_type='application/x-feedcontent-json',
-    content_encoding='utf-8'
-)
-
-CELERY_ACCEPT_CONTENT = ['feedcontentjson', 'json']
-CELERY_TASK_SERIALIZER = 'feedcontentjson'
-CELERY_EVENT_SERIALIZER = 'feedcontentjson'
-CELERY_RESULT_SERIALIZER = 'feedcontentjson'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_EVENT_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
 
 PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
 
@@ -112,16 +102,20 @@ INSTALLED_APPS = (
     'djcelery',
     'feeds',
     'accounts',
+    'rest_framework',
+    'rest_framework.authtoken',
 )
 
-TEMPLATE_CONTEXT_PROCESSORS = ("django.contrib.auth.context_processors.auth",
-"django.core.context_processors.debug",
-"django.core.context_processors.i18n",
-"django.core.context_processors.media",
-"django.core.context_processors.static",
-"django.core.context_processors.tz",
-"django.contrib.messages.context_processors.messages",
-"django.core.context_processors.request")
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "django.core.context_processors.request"
+)
 
 LOGGING = {
     'version': 1,
@@ -136,6 +130,10 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'stdout': {
+            'level': 'WARN',
+            'class': 'logging.StreamHandler',
         }
     },
     'loggers': {
@@ -144,6 +142,9 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        '': {
+            'handlers': ['stdout'],
+        }
     }
 }
 
@@ -168,3 +169,25 @@ CELERY_TASK_RESULT_EXPIRES = 10 # 10 seconds to expire the result
 CELERY_TRACK_STARTED = True
 CELERY_ACKS_LATE = False
 CELERY_SEND_EVENTS = True
+
+#
+# REST framework
+#
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '50/day',
+        'user': '100/second',
+        'login': '30/minute',
+    },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
+}
