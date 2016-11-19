@@ -1,9 +1,10 @@
 beautifulsoup4
-celery[redis]
+celery[redis]==3.1.17
 coverage
 django==1.8.9
 djangorestframework
-django-celery>=3.1.17
+django-celery==3.1.17
+django-cors-headers
 django-nose
 feedparser
 flake8

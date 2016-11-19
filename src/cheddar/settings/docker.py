@@ -34,6 +34,9 @@ STATIC_ROOT = '/var/cheddar/static'
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'secret key unset')
 
+CORS_ORIGIN_ALLOW_ALL = os.environ.get('CORS_ORIGIN_ALLOW_ALL', '') == 'YES' # You need to shout this out
+CORS_ORIGIN_WHITELIST = os.environ.get('CORS_ORIGIN_WHITELIST', '').split(',') # Comma separated values
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
