@@ -31,3 +31,16 @@ class AuthenticationTestCase(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['username'], self.user.username)
         token.delete()
+
+    def test_destroy_token(self):
+        token = Token.objects.get_or_create(user=self.user)[0]
+        self.client.credentials(HTTP_AUTHORIZATION='Token {}'.format(token.key))
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(len(response.content), 0)
+        self.assertFalse(Token.objects.filter(user=self.user).exists())
+
+    def test_destroy_token_without_token(self):
+        response = self.client.delete(self.url, status=401)
+        self.assertEqual(response.status_code, 401)
+        self.assertFalse(Token.objects.filter(user=self.user).exists())

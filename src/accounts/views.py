@@ -40,3 +40,10 @@ class AuthenticateViewSet(viewsets.ViewSet):
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key})
+
+    def delete(self, request, format=None):
+        if request.user.is_authenticated():
+            Token.objects.get(user=request.user).delete()
+            return Response(status=204)
+        else:
+            return Response(status=401)
