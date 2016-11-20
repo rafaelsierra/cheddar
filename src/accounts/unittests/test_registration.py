@@ -79,3 +79,14 @@ class RegistrationTestCase(APITestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn('email', response.data)
+
+    def test_email_field_missing(self):
+        response = self.client.post(
+            self.url,
+            {
+                'username': 'username',
+                'password': 'another password',
+            }
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('email', response.data)
