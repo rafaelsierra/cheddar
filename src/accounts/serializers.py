@@ -13,6 +13,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
 class NewAccountSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
+
     class Meta:
         model = User
         fields = ('username', 'email', 'password')
