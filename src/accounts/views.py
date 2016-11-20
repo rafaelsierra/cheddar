@@ -3,7 +3,6 @@ from rest_framework.compat import is_authenticated
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from .serializers import AccountSerializer, NewAccountSerializer
