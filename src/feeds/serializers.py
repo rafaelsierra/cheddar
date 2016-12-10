@@ -98,6 +98,7 @@ class PostSerializer(serializers.ModelSerializer):
             'date',
             'is_starred',
             'is_shared',
+            'url',
         )
 
 
