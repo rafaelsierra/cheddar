@@ -28,6 +28,43 @@ RSS_TEMPLATE = """
 </rss>
 """
 
+OGLAF_RSS_TEMPLATE = """<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0"><channel><title>Oglaf! -- Comics. Often dirty.</title><link>http://oglaf.com/latest/</link><description>Comics. Often dirty. Updates Sundays.</description><atom:link href="http://oglaf.com/feeds/rss/" rel="self"></atom:link><language>en-us</language><lastBuildDate>Sun, 04 Dec 2016 18:54:12 -0000</lastBuildDate><item><title>Apocrypha</title><link>http://oglaf.com/apocrypha/</link><description>&lt;div style="display:block; background-color: #ccc;"&gt;&lt;p&gt;&lt;img src="http://media.oglaf.com/story/ttapocrypha.gif" /&gt;&lt;/p&gt;&lt;p&gt;&lt;a href="http://oglaf.com/apocrypha/"&gt;&lt;img src="http://media.oglaf.com/archive/arc-apocrypha.png" width="400" height="100" border="0" alt="http://oglaf.com/apocrypha/" /&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</description><guid>http://oglaf.com/apocrypha/</guid></item><item><title>The Rack</title><link>http://oglaf.com/therack/</link><description>&lt;div style="display:block; background-color: #ccc;"&gt;&lt;p&gt;&lt;img src="http://media.oglaf.com/story/tttherack.gif" /&gt;&lt;/p&gt;&lt;p&gt;&lt;a href="http://oglaf.com/therack/"&gt;&lt;img src="http://media.oglaf.com/archive/arc-therack.png" width="400" height="100" border="0" alt="http://oglaf.com/therack/" /&gt;&lt;/a&gt;&lt;/p&gt;&lt;/div&gt;</description><guid>http://oglaf.com/therack/</guid></item></channel></rss>
+"""
+
+
+class OglafTestCase(APITestCase):
+    @responses.activate
+    def setUp(self):
+        self.user = User.objects.create(username='sdm', is_active=True)
+        self.user.set_password('1234')
+        self.user.save()
+        self.client.login(username='sdm', password='1234')
+        self.feed_url = 'http://oglaf.com/feeds/rss/'
+
+        responses.add(
+            responses.GET,
+            self.feed_url,
+            body=OGLAF_RSS_TEMPLATE
+        )
+        # Subscribe to this feed
+        self.client.post(
+            '/v1/feeds/sites',
+            {'feed_url': self.feed_url}
+        )
+        self.site = Site.objects.get(feed_url=self.feed_url)
+
+    def tearDown(self):
+        self.user.delete()
+        Post.objects.all().delete()
+        Site.objects.all().delete()
+
+    def test_content_must_not_be_empty(self):
+        # Every post in this feed has a content, as weird as it is, it is still a content
+        for post in self.site.posts.all():
+            print(post.content)
+            self.assertIn('img', post.content)
+
 
 class PostsTestCase(APITestCase):
     @responses.activate

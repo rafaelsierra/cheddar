@@ -14,15 +14,16 @@ class SiteAdmin(admin.ModelAdmin):
 
     def force_worker(self, request, queryset):
         for site in queryset:
-            site.next_update = timezone.now() - datetime.timedelta(hours=24)
+            self.last_update = site.next_update = timezone.now() - datetime.timedelta(hours=24)
             site.save()
+            site.update_feed()
     force_worker.short_description = u"Force another site worker"
 
 
 class PostAdmin(admin.ModelAdmin):
     raw_id_fields = ('site',)
     list_display = ('small_title', 'author', 'site_name', 'created_at', 'captured_at')
-    search_fields = ('title', 'text', 'site__title')
+    search_fields = ('title', 'content', 'site__title')
 
     def site_name(self, instance):
         return instance.site.title if instance.site.title else str(instance.site.id)

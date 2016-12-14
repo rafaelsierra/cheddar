@@ -21,7 +21,7 @@ DATABASES = {
     }
 }
 
-CELERY_BROKER_URL = os.environ['CELERY_BROKER_URL']
+BROKER_URL = os.environ['BROKER_URL']
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 
