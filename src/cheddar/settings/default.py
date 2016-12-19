@@ -3,10 +3,6 @@
 import os
 from datetime import timedelta
 
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_EVENT_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
 
 PROJECT_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..')
 
@@ -48,7 +44,6 @@ DATABASES = {
     }
 }
 
-BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 
 ALLOWED_HOSTS = ['localhost']
 
@@ -92,7 +87,7 @@ WSGI_APPLICATION = 'cheddar.wsgi.application'
 
 TEMPLATE_DIRS = ()
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -100,13 +95,12 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    'djcelery',
     'corsheaders',
     'feeds',
     'accounts',
     'rest_framework',
     'rest_framework.authtoken',
-)
+]
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
@@ -156,21 +150,30 @@ LOGGING = {
 CELERY_IMPORTS = (
     'feeds.tasks',
 )
-CELERY_ROUTES = {
+CELERY_TASK_ROUTES = {
     'feeds.tasks.make_request': {'queue': 'make_request'},
     'feeds.tasks.parse_feed': {'queue': 'parse_feed'},
     'feeds.tasks.update_site_feed': {'queue': 'update_site_feed'},
 }
-CELERYBEAT_SCHEDULE = {
+CELERY_BEAT_SCHEDULE = {
     'check_sites_up': {
         'task': 'feeds.tasks.check_sites_for_update',
         'schedule': timedelta(seconds=60),
     },
 }
-CELERY_TASK_RESULT_EXPIRES = 10 # 10 seconds to expire the result
-CELERY_TRACK_STARTED = True
-CELERY_ACKS_LATE = False
+
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+
+CELERY_RESULT_EXPIRES = 10 # 10 seconds to expire the result
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_ACKS_LATE = False
 CELERY_SEND_EVENTS = True
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_EVENT_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
 
 #
 # REST framework

@@ -34,8 +34,8 @@ def make_request(url):
     '''
     try:
         response = download(url)
-    except (requests.ConnectionError, requests.HTTPError):
-        logger.error('Failed trying to download {}'.format('url'))
+    except (requests.ConnectionError, requests.HTTPError) as error:
+        logger.error('Failed trying to download {}: {!r}'.format(url, error))
         return -1, None, ''
 
     return [response['status_code'], dict(response['headers']), response['text']]
@@ -60,7 +60,6 @@ def update_site_feed(feed, site_id):
     '''This functions handles the feed update of site and is kind of recursive,
     since in the end it will call another apply_async onto himself'''
     from feeds.models import Post, Site
-    from feeds.utils import get_final_url
     from feeds.utils import get_sanitized_html
     # Avoids running two instances at the time
     # Update task_id for this site
@@ -98,7 +97,7 @@ def update_site_feed(feed, site_id):
             # Without link we can't save this post
             if 'link' not in entry:
                 continue
-            url = get_final_url(entry['link'])
+            url = entry['link']
             title = entry.get('title', '')
 
             # Try to get content
@@ -117,6 +116,11 @@ def update_site_feed(feed, site_id):
 
             if isinstance(content, dict):
                 content = content.get('value')
+
+            # Still no content found, lets try using summary
+            if not content and entry.get('summary'):
+                content = entry['summary']
+
             # Parses the content to avoid broken HTML and script tags
             content = get_sanitized_html(content)
 
@@ -140,16 +144,16 @@ def update_site_feed(feed, site_id):
                         'url': url,
                         'content': content,
                         'author': author,
+                        'created_at': created_at
                     }
                 )
             except IntegrityError:
                 # Raised when two posts have the same URL
+                logger.warn('Final URL {} is duplicated'.format(url))
                 pass
             else:
                 if created:
                     new_posts_found += 1
-                post.created_at = created_at
-                post.save()
 
         logger.info(
             'Site {site_id} got {new} new posts from {total} in feed'.format(

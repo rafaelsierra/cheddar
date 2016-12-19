@@ -66,7 +66,7 @@ def get_sanitized_html(html):
         for attr, value in list(tag.attrs.items()):
             if tag.name == 'a' and attr == 'href':
                 continue
-            if tag.name == 'img' and attr == 'src':
+            if tag.name == 'img' and attr in ('src', 'width', 'height'):
                 continue
             if tag.name == 'video' and attr == 'src':
                 continue

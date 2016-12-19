@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 # Django settings for a Dockerized cheddar
 from .default import *  # NOQA
-import djcelery
 
 import os
 
 PROJECT_ROOT = '/opt/cheddar'
 USE_X_FORWARDED_HOST = True
-ALLOWED_HOST = ['*']
 
 DEBUG = bool(os.environ.get('DEBUG', False))
 TEMPLATE_DEBUG = DEBUG
@@ -22,7 +20,8 @@ DATABASES = {
     }
 }
 
-BROKER_URL = os.environ['BROKER_URL']
+CELERY_BROKER_URL = os.environ['CELERY_BROKER_URL']
+CELERY_RESULT_BACKEND = os.environ['CELERY_RESULT_BACKEND']
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 
@@ -55,4 +54,3 @@ LOGGING = {
     }
 }
 
-djcelery.setup_loader()

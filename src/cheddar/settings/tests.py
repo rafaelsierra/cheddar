@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-# Django settings for a Dockerized cheddar
+from __future__ import absolute_import, unicode_literals
+
+# Django settings for testing cheddar
 from .default import *  # NOQA
-import djcelery
 
 
 USE_X_FORWARDED_HOST = True
@@ -9,6 +10,8 @@ ALLOWED_HOST = ['*']
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
+
+INSTALLED_APPS.append('django_celery_results')
 
 DATABASES = {
     'default': {
@@ -19,6 +22,6 @@ DATABASES = {
 
 SECRET_KEY = 'something to test'
 
-TEST_RUNNER = 'djcelery.contrib.test_runner.CeleryTestSuiteRunner'
-
-djcelery.setup_loader()
+CELERY_BROKER_URL = 'memory://'
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_RESULT_BACKEND = 'django-db'
