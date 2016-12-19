@@ -62,7 +62,6 @@ class OglafTestCase(APITestCase):
     def test_content_must_not_be_empty(self):
         # Every post in this feed has a content, as weird as it is, it is still a content
         for post in self.site.posts.all():
-            print(post.content)
             self.assertIn('img', post.content)
 
 

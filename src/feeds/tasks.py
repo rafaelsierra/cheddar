@@ -34,8 +34,8 @@ def make_request(url):
     '''
     try:
         response = download(url)
-    except (requests.ConnectionError, requests.HTTPError):
-        logger.error('Failed trying to download {}'.format('url'))
+    except (requests.ConnectionError, requests.HTTPError) as error:
+        logger.error('Failed trying to download {}: {!r}'.format(url, error))
         return -1, None, ''
 
     return [response['status_code'], dict(response['headers']), response['text']]
@@ -98,7 +98,7 @@ def update_site_feed(feed, site_id):
             # Without link we can't save this post
             if 'link' not in entry:
                 continue
-            url = get_final_url(entry['link'])
+            url = entry['link']
             title = entry.get('title', '')
 
             # Try to get content
@@ -144,6 +144,7 @@ def update_site_feed(feed, site_id):
                 )
             except IntegrityError:
                 # Raised when two posts have the same URL
+                logger.warn('Final URL {} is duplicated'.format(url))
                 pass
             else:
                 if created:

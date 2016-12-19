@@ -1,11 +1,12 @@
 beautifulsoup4
-celery[redis]==4.0.1
+celery[redis,eventlet]==4.0.1
 coverage
 django==1.8.9
 djangorestframework
 django-celery-results
 django-cors-headers
 django-nose
+eventlet
 feedparser
 flake8
 flower
